@@ -1055,7 +1055,7 @@ dash.draw('agent-cards', (box) => {
   const now = dash.data('agent_now'), editing = now.status === 'ok' && now.data[0] ? now.data[0].agent_id : '';
   const [cards, pf] = got, p = pf[0] || {}, off = new Set(String(p.off || '').split(',').filter(Boolean));
   pickBox = box;
-  const setOff = (next) => dash.setParams({off: [...next].join(',')});
+  const setOff = (next) => dash.setParams({off: [...next].length ? [...next].join(',') : null});
   const tools = h('div', 'cc-pick-tools'), all = h('button', 'cc-btn', 'Select all'), none = h('button', 'cc-btn', 'Clear');
   const sum = h('p', 'cc-pick-sum');
   sum.append(h('b', '', fmts.int(p.selected || 0) + ' of ' + fmts.int(cards.length)), ' agents ticked ', h('span', 'cc-hero-dot', '·'), ' ', h('b', '', fmts.usd0(p.revenue_month || 0)), ' a month');

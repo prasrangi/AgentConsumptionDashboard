@@ -80,8 +80,8 @@ dash.calc('engine', {
       const s = {...settings(a, P), unitName: a.unit};
       const users = PERIODS.map((p, n) => usersIn(s.users, growth, n));
       const grow = users.map((u, n) => (s.users ? u / s.users : (1 + growth) ** n));
-      out.agents.push({agent_id: a.agent_id, agent: a.agent, kind: 'Modelled', build: BUILDS[s.build], starts: 0, users,
-        credits: users.map((u, n) => month(acts, rate, s, u, grow[n]).before * (1 + buffer))});
+      const alt = Object.fromEntries(Object.keys(BUILDS).map((build) => [build, users.map((u, n) => month(acts, rate, {...s, build}, u, grow[n]).before * (1 + buffer))]));
+      out.agents.push({agent_id: a.agent_id, agent: a.agent, kind: 'Modelled', build: BUILDS[s.build], s_build: s.build, starts: 0, users, credits: alt[s.build], alt});
       if (a !== chosen) continue;
       const m = month(acts, rate, s, s.users, 1), total = m.before * (1 + buffer), b = buy(total, rate, basis);
       const extraName = String(a.extra_label || 'Extra work').replace(/ per month$/i, ''), unitsName = a.unit[0].toUpperCase() + a.unit.slice(1) + 's';
@@ -104,10 +104,6 @@ dash.calc('engine', {
         waterfall: steps.map(([step, v]) => ({step, credits: r2(v), from: r2(at), to: r2(at += v), total: false}))
           .concat({step: 'Total credits', credits: r2(total), from: 0, to: r2(total), total: true}),
         meters: sorted.map(([meter, v]) => ({meter, credits_month: r2(v), share_pct: m.before ? r2(100 * v / m.before) : 0})),
-        builds: ['standard', 'harness'].map((build, i) => {
-          const c = built[i], x = buy(c, rate, basis);
-          return {build: BUILDS[build], credits_month: r2(c), revenue_month: r2(x.revenue), payg: r2(x.payg), packs: r2(x.packs), hybrid: r2(x.hybrid), cheapest: x.cheapest, chosen: build === s.build};
-        }),
         heat: shares.flatMap((pct) => counts.map((u) => ({licence_pct: pct, users: u, current: u === s.users && pct === Math.round(s.lic * 100),
           revenue_month: r2(buy(month(acts, rate, {...s, lic: pct / 100}, u, 1).before * (1 + buffer), rate, basis).revenue)}))),
       };
@@ -140,7 +136,22 @@ dash.calc('book', {
       change_pct: p.n && today.revenue_year ? r2(100 * (p.revenue_year / today.revenue_year - 1)) : null,
       cumulative: p.n ? r2(sum += p.revenue_year) : null}));
     let run = 0;
+    // The whole portfolio built one way or the other: every modelled agent switched, planned agents as entered.
+    const modelled = engine.agents.length;
+    const builds = Object.keys(BUILDS).map((build) => {
+      const bought = PERIODS.map((x, n) => buy(agents.filter((a) => n >= a.starts).reduce((t, a) => t + (a.alt ? a.alt[build][n] : a.credits[n]), 0), rate, basis));
+      const credits = agents.reduce((t, a) => t + (a.starts ? 0 : a.alt ? a.alt[build][0] : a.credits[0]), 0);
+      const on = engine.agents.filter((a) => a.s_build === build).length;
+      return {build_id: build, build: BUILDS[build], credits_month: r2(credits), revenue_month: r2(bought[0].revenue), revenue_year: r2(bought[0].revenue * 12),
+        three_year: r2(bought.slice(1).reduce((t, b) => t + b.revenue * 12, 0)), agents_on: on, agents_modelled: modelled,
+        in_use: on === 0 ? 'No' : on === modelled ? 'All' : 'Some'};
+    });
+    const top = Math.max(...builds.map((b) => b.revenue_month)), low = Math.min(...builds.map((b) => b.revenue_month));
+    builds.forEach((b) => Object.assign(b, {higher: modelled > 0 && top > low && b.revenue_month === top, scale_pct: top ? r2(100 * b.revenue_month / top) : 0,
+      times_other: b.revenue_month === top && low > 0 ? r2(top / low) : null,
+      credit_ratio: builds[0].credits_month ? r2(builds[1].credits_month / builds[0].credits_month) : null}));
     return {
+      builds,
       forecast,
       split: periods.flatMap((p) => agents.map((a) => ({period: p.period, n: p.n, agent_id: a.agent_id, agent: a.agent, kind: a.kind,
         users: p.n >= a.starts ? a.users[p.n] : 0, revenue_year: r2(share(a, p.n) * 12)}))),
@@ -168,10 +179,10 @@ view('forecast', 'book', 'Three-year forecast', `Today, then each year with user
 view('forecast_agents', 'book', 'Forecast by agent', `Each agent's share of every year's revenue.`, (book) => book.split);
 view('runway', 'book', 'Cumulative revenue by month', 'Revenue added month by month over the three forecast years.', (book) => book.runway);
 view('agent_totals', 'book', 'Agents in the portfolio', 'One line per agent: users, credits, revenue today and in Year 3.', (book) => book.agents);
+view('build_compare', 'book', 'Standard agent against Copilot harness, whole portfolio', 'Revenue if every modelled agent were built as a standard agent, and if every one ran on the Copilot harness, everything else as set. Planned agents count the same either way.', (book) => book.builds);
 view('purchase', 'book', 'Ways to buy the credits', `This month's portfolio credits priced three ways.`, (book) => book.purchase);
 view('agent_now', 'engine', 'Selected agent today', `The selected agent at the settings on the page, line for line with the workbook's Monthly Estimate.`, (engine) => (engine.detail ? [engine.detail.now] : []));
 view('activity_credits', 'engine', 'Credits by activity', 'Monthly volume and credits of every prompt and scenario of the selected agent, before the buffer.', (engine) => (engine.detail ? engine.detail.rows : []));
 view('waterfall', 'engine', 'How the monthly credits build up', 'Quote, extra work, other scenarios and buffer credits of the selected agent.', (engine) => (engine.detail ? engine.detail.waterfall : []));
 view('meters', 'engine', 'Credits by billing meter', `The selected agent's monthly credits by what is billed, before the buffer.`, (engine) => (engine.detail ? engine.detail.meters : []));
-view('builds', 'engine', 'Standard agent against Copilot harness', 'The selected agent built either way at the same settings.', (engine) => (engine.detail ? engine.detail.builds : []));
 view('heat', 'engine', 'Revenue by users and licence share', 'Monthly revenue of the selected agent at other user counts and licence shares, everything else as set.', (engine) => (engine.detail ? engine.detail.heat : []));

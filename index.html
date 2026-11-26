@@ -9,14 +9,67 @@
 <style>
 .cc { --cc-a: var(--color-fg); container-type: inline-size; display: grid; gap: var(--cds-gap-lg); font-family: var(--font-anthropic-sans); font-size: var(--cds-font-size-body); color: var(--color-fg); }
 .cc * { box-sizing: border-box; }
-.cc-eyebrow { margin: 0; font-size: var(--cds-font-size-caption); letter-spacing: .08em; text-transform: uppercase; color: var(--color-fg-muted); }
-.cc-title { margin: 2px 0 6px; font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); line-height: 1.15; }
-.cc-lede { margin: 0; max-width: 78ch; line-height: 1.5; color: var(--color-fg-muted); }
-.cc-lede b { color: var(--color-fg); font-weight: var(--cds-font-weight-medium); }
+/* the top of the page: a dark band that holds the headline and the two builds */
+.cc-hero { --hx-fg: #f3f6fb; --hx-muted: #a9b7cd; --hx-line: rgba(255, 255, 255, .14); --hx-win: #34d27b; --hx-alt: #5aa2ff; --hx-ink: #06240f;
+  position: relative; isolation: isolate; overflow: hidden; display: grid; gap: 14px; padding: 26px 28px 20px; border-radius: 18px; color: var(--hx-fg);
+  background: radial-gradient(820px 300px at 92% -20%, rgba(70, 200, 255, .20), transparent 62%), radial-gradient(700px 320px at -5% 120%, rgba(90, 120, 255, .26), transparent 60%),
+    linear-gradient(135deg, #0a1428 0%, #0d2147 55%, #0b2b3f 100%);
+  box-shadow: 0 14px 34px -12px rgba(8, 18, 40, .45); }
+.cc-hero::before { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background-image: linear-gradient(rgba(255, 255, 255, .05) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .05) 1px, transparent 1px);
+  background-size: 34px 34px; -webkit-mask-image: linear-gradient(180deg, #000, transparent 80%); mask-image: linear-gradient(180deg, #000, transparent 80%); }
+.cc-hero p { margin: 0; }
+.cc-hero .dash-skeleton { color: transparent; background: rgba(255, 255, 255, .12); }
+.cc-hero-top { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 18px 32px; align-items: end; }
+.cc-hero-id { display: grid; gap: 10px; min-width: 0; }
+.cc-eyebrow { display: inline-flex; align-items: center; gap: 9px; margin: 0; font-size: var(--cds-font-size-caption); font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: #8fd0ff; }
+.cc-pulse { position: relative; width: 8px; height: 8px; border-radius: 50%; background: #46c8ff; box-shadow: 0 0 0 0 rgba(70, 200, 255, .6); animation: cc-pulse 2.4s ease-out infinite; }
+@keyframes cc-pulse { 70% { box-shadow: 0 0 0 9px rgba(70, 200, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(70, 200, 255, 0); } }
+@media (prefers-reduced-motion: reduce) { .cc-pulse { animation: none; } }
+.cc-hero .cc-title { margin: 0; font-family: var(--font-anthropic-sans); font-size: clamp(1.6rem, 3.1cqi, 2.25rem); font-weight: 650; letter-spacing: -0.02em; line-height: 1.1; color: var(--hx-fg); }
+.cc-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 2px 0 0; padding: 0; list-style: none; }
+.cc-chips li { display: inline-flex; align-items: baseline; gap: 7px; padding: 5px 11px; border: 1px solid var(--hx-line); border-radius: 99px; background: rgba(255, 255, 255, .06); font-size: var(--cds-font-size-caption); color: var(--hx-muted); white-space: nowrap; }
+.cc-chips b { color: var(--hx-fg); font-weight: 600; font-variant-numeric: tabular-nums; }
+.cc-hero-total { display: grid; gap: 4px; justify-items: end; text-align: right; }
+.cc-hero-k { font-size: var(--cds-font-size-caption); font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--hx-muted); }
+.cc-hero-big { font-size: clamp(2.4rem, 5.2cqi, 3.5rem); font-weight: 700; letter-spacing: -0.03em; line-height: 1; font-variant-numeric: tabular-nums; color: var(--hx-fg); }
+.cc-hero-sub { font-size: 13px; color: var(--hx-muted); }
+.cc-hero-sub b { color: var(--hx-fg); font-weight: 600; font-variant-numeric: tabular-nums; }
+.cc-hero .cc-hero-delta.cc-up { color: var(--hx-win); }
+.cc-hero .cc-hero-delta.cc-down { color: #ff8a8a; }
+.cc-hero-dot { margin: 0 3px; opacity: .6; }
+.cc-hero-label { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin-top: 8px; padding-top: 16px; border-top: 1px solid var(--hx-line); }
+.cc-hero-note { font-size: var(--cds-font-size-caption); color: var(--hx-muted); }
+.cc-hero-foot { font-size: var(--cds-font-size-caption); color: var(--hx-muted); opacity: .85; }
+.cc-hero-builds { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 12px; align-items: stretch; min-height: 150px; border-radius: 14px; }
+.cc-build { --c: var(--hx-alt); display: grid; gap: 8px; align-content: start; min-width: 0; padding: 16px 20px 18px; border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--c) 60%, transparent);
+  background: linear-gradient(155deg, color-mix(in srgb, var(--c) 24%, transparent), color-mix(in srgb, var(--c) 7%, transparent) 70%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08); }
+.cc-build-win { --c: var(--hx-win); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1), 0 0 0 1px color-mix(in srgb, var(--c) 35%, transparent), 0 12px 32px -10px color-mix(in srgb, var(--c) 55%, transparent); }
+.cc-build-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
+.cc-build-name { display: inline-flex; align-items: center; gap: 8px; margin-right: auto; font-size: var(--cds-font-size-caption); font-weight: 650; letter-spacing: .09em; text-transform: uppercase; color: var(--hx-fg); }
+.cc-build-name::before { content: ''; width: 10px; height: 10px; border-radius: 3px; background: var(--c); box-shadow: 0 0 10px var(--c); }
+.cc-badge { padding: 2px 9px; border: 1px solid var(--hx-line); border-radius: 99px; font-size: var(--cds-font-size-caption); color: var(--hx-fg); background: rgba(255, 255, 255, .06); white-space: nowrap; }
+.cc-badge-win { border-color: var(--hx-win); background: var(--hx-win); color: var(--hx-ink); font-weight: 700; }
+.cc-build-v { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; font-size: clamp(2rem, 4.4cqi, 2.85rem); font-weight: 700; letter-spacing: -0.025em; line-height: 1.05; font-variant-numeric: tabular-nums; color: var(--hx-fg); }
+.cc-build-v small { font-size: 14px; font-weight: 500; letter-spacing: 0; color: var(--hx-muted); }
+.cc-build-sub { font-size: 13px; color: var(--hx-muted); }
+.cc-build-sub b { color: var(--hx-fg); font-weight: 600; font-variant-numeric: tabular-nums; }
+.cc-build-track { height: 6px; margin-top: 4px; border-radius: 99px; background: rgba(255, 255, 255, .1); overflow: hidden; }
+.cc-build-track i { display: block; height: 100%; border-radius: 99px; background: var(--c); }
+.cc-build-foot { font-size: var(--cds-font-size-caption); color: var(--hx-muted); font-variant-numeric: tabular-nums; }
+.cc-build-use { justify-self: start; margin-top: 2px; padding: 5px 12px; font: inherit; font-size: var(--cds-font-size-caption); font-weight: 600; color: var(--hx-fg); background: transparent; border: 1px solid color-mix(in srgb, var(--c) 70%, transparent); border-radius: 99px; cursor: pointer; }
+.cc-build-use::after { content: ' →'; }
+.cc-build-use:hover { background: color-mix(in srgb, var(--c) 22%, transparent); }
+.cc-build-use:focus-visible { outline: 2px solid var(--c); outline-offset: 2px; }
+.cc-vs { align-self: center; display: grid; place-items: center; width: 40px; height: 40px; border: 1px solid var(--hx-line); border-radius: 50%; background: rgba(8, 16, 34, .7);
+  font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--hx-muted); }
 .cc-layout { display: grid; grid-template-columns: minmax(248px, 300px) minmax(0, 1fr); gap: var(--cds-gap-lg); align-items: start; }
 .cc-main { display: grid; gap: var(--cds-gap-xl); min-width: 0; }
 .cc-sec { display: grid; gap: var(--cds-gap-md); min-width: 0; }
-.cc-h2 { margin: 0; font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); }
+.cc-h2 { display: flex; align-items: center; gap: 10px; margin: 0; font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); }
+.cc-h2::before { content: ''; flex: none; width: 4px; height: 18px; border-radius: 2px; background: linear-gradient(180deg, #5aa2ff, #46c8ff); }
 .cc-h3 { margin: 0 0 2px; font-size: var(--cds-font-size-body); font-weight: var(--cds-font-weight-medium); }
 .cc-note { margin: 0; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); line-height: 1.45; }
 .cc-card { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); min-width: 0; }
@@ -113,6 +166,13 @@
   .cc-rail { position: static; max-height: none; overflow: visible; grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .cc-periods { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+@container (max-width: 760px) {
+  .cc-hero { padding: 20px 18px 16px; }
+  .cc-hero-top { grid-template-columns: minmax(0, 1fr); }
+  .cc-hero-total { justify-items: start; text-align: left; }
+  .cc-hero-builds { grid-template-columns: minmax(0, 1fr); }
+  .cc-vs { display: none; }
+}
 @container (max-width: 560px) {
   .cc-rail, .cc-two { grid-template-columns: minmax(0, 1fr); }
   .cc-bars { grid-template-columns: minmax(0, 1fr) auto; }
@@ -160,12 +220,28 @@ html, body { margin: 0; background: var(--color-bg); }
 <body>
 <div id="dash-root">
 <div class='cc'>
-<div class='cc-head'>
-<p class='cc-eyebrow'>Copilot Credits, agent portfolio</p>
+<header class='cc-hero' id='hero'>
+<div class='cc-hero-top'>
+<div class='cc-hero-id'>
+<p class='cc-eyebrow'><span class='cc-pulse' aria-hidden='true'></span>Copilot Credits · Agent portfolio</p>
 <h1 class='cc-title' id='title'>Copilot Credit revenue across agents</h1>
-<p class='cc-lede' id='takeaway'>Today the portfolio earns <b data-draw='v' data-source='portfolio' data-field='revenue_month' data-row='0' data-fmt='usd'>—</b> a month in Copilot Credits from <b data-draw='v' data-source='portfolio' data-field='users' data-row='0' data-fmt='int'>—</b> users. With <b data-draw='v' data-source='portfolio' data-field='growth_pct' data-row='0' data-fmt='pct'>—</b> more users each year that is <b data-draw='v' data-source='portfolio' data-field='year1' data-row='0' data-fmt='usd'>—</b> in Year 1, <b data-draw='v' data-source='portfolio' data-field='year2' data-row='0' data-fmt='usd'>—</b> in Year 2 and <b data-draw='v' data-source='portfolio' data-field='year3' data-row='0' data-fmt='usd'>—</b> in Year 3, or <b data-draw='v' data-source='portfolio' data-field='three_year' data-row='0' data-fmt='usd'>—</b> over the three years.</p>
-<p class='cc-note cc-caveat'>A planning estimate: volumes are illustrative and rates are those recorded in the calculator workbook. Move the sliders to test your own numbers; the link in the address bar keeps your settings.</p>
+<ul class='cc-chips' aria-label='Current settings'>
+<li><span>Agents live</span><b data-draw='v' data-source='portfolio' data-field='agents' data-row='0' data-fmt='int'>—</b></li>
+<li><span>Users today</span><b data-draw='v' data-source='portfolio' data-field='users' data-row='0' data-fmt='int'>—</b></li>
+<li><span>User growth a year</span><b data-draw='v' data-source='portfolio' data-field='growth_pct' data-row='0' data-fmt='pct'>—</b></li>
+<li><span>Priced at</span><b data-draw='v' data-source='portfolio' data-field='basis' data-row='0'>—</b></li>
+</ul>
 </div>
+<div class='cc-hero-total' id='takeaway'>
+<p class='cc-hero-k'>Three-year revenue</p>
+<p class='cc-hero-big' data-draw='v' data-source='portfolio' data-field='three_year' data-row='0' data-fmt='usd'>—</p>
+<p class='cc-hero-sub'><b data-draw='v' data-source='portfolio' data-field='revenue_month' data-row='0' data-fmt='usd0'>—</b> a month today <span class='cc-hero-dot' aria-hidden='true'>·</span> <b class='cc-hero-delta' data-draw='v' data-source='portfolio' data-field='uplift_pct' data-row='0' data-fmt='delta'>—</b> by Year 3</p>
+</div>
+</div>
+<div class='cc-hero-label'><p class='cc-hero-k'>Revenue a month by build</p><p class='cc-hero-note'>Every agent built the same way, everything else as set</p></div>
+<div class='cc-hero-builds dash-skeleton' id='builds' data-draw='hero-builds' data-source='build_compare agents' role='group' aria-label='Monthly revenue of the whole portfolio as standard agents and on the Copilot harness'></div>
+<p class='cc-hero-foot'>Planning estimate: illustrative volumes at the calculator workbook's rates. Your settings are saved in the link.</p>
+</header>
 <div class='cc-layout'>
 <div class='cc-rail' id='controls'>
 <div class='cc-card cc-group' id='controls-portfolio'>
@@ -378,12 +454,7 @@ html, body { margin: 0; background: var(--color-bg); }
 <p class='cc-note'>Credits a month for every prompt and scenario that uses any, largest first, before the buffer.</p>
 <div class='cc-chart dash-skeleton' id='chart-activities' style='--cc-h: 240px' data-draw='chart-activities' data-source='activity_credits waterfall' aria-label='Bars of monthly credits by activity, largest first'></div>
 </div>
-<div class='cc-card' id='card-builds'>
-<h3 class='cc-h3'>Standard agent against Copilot harness</h3>
-<p class='cc-note'>The same agent and settings built either way, as revenue a month. The harness build uses <b data-draw='v' data-source='agent_now' data-field='harness_ratio' data-row='0' data-fmt='dec'>—</b> times the credits.</p>
-<div class='cc-chart dash-skeleton' id='chart-builds' style='--cc-h: 64px' data-draw='chart-builds' data-source='builds' aria-label='Bars of monthly revenue for the standard agent and the Copilot harness agent'></div>
-</div>
-<div class='cc-card' id='card-heat'>
+<div class='cc-card cc-wide' id='card-heat'>
 <h3 class='cc-h3'>Revenue a month at other user counts and licence shares</h3>
 <p class='cc-note'>Columns are users, rows the share of them holding a Microsoft Copilot licence. The outlined cell is the current setting; everything else stays as set.</p>
 <div class='cc-chart dash-skeleton' id='chart-heat' style='--cc-h: 200px' data-draw='chart-heat' data-source='heat' aria-label='Grid of monthly revenue by number of users and share of licensed users'></div>
@@ -613,8 +684,8 @@ dash.calc('engine', {
       const s = {...settings(a, P), unitName: a.unit};
       const users = PERIODS.map((p, n) => usersIn(s.users, growth, n));
       const grow = users.map((u, n) => (s.users ? u / s.users : (1 + growth) ** n));
-      out.agents.push({agent_id: a.agent_id, agent: a.agent, kind: 'Modelled', build: BUILDS[s.build], starts: 0, users,
-        credits: users.map((u, n) => month(acts, rate, s, u, grow[n]).before * (1 + buffer))});
+      const alt = Object.fromEntries(Object.keys(BUILDS).map((build) => [build, users.map((u, n) => month(acts, rate, {...s, build}, u, grow[n]).before * (1 + buffer))]));
+      out.agents.push({agent_id: a.agent_id, agent: a.agent, kind: 'Modelled', build: BUILDS[s.build], s_build: s.build, starts: 0, users, credits: alt[s.build], alt});
       if (a !== chosen) continue;
       const m = month(acts, rate, s, s.users, 1), total = m.before * (1 + buffer), b = buy(total, rate, basis);
       const extraName = String(a.extra_label || 'Extra work').replace(/ per month$/i, ''), unitsName = a.unit[0].toUpperCase() + a.unit.slice(1) + 's';
@@ -637,10 +708,6 @@ dash.calc('engine', {
         waterfall: steps.map(([step, v]) => ({step, credits: r2(v), from: r2(at), to: r2(at += v), total: false}))
           .concat({step: 'Total credits', credits: r2(total), from: 0, to: r2(total), total: true}),
         meters: sorted.map(([meter, v]) => ({meter, credits_month: r2(v), share_pct: m.before ? r2(100 * v / m.before) : 0})),
-        builds: ['standard', 'harness'].map((build, i) => {
-          const c = built[i], x = buy(c, rate, basis);
-          return {build: BUILDS[build], credits_month: r2(c), revenue_month: r2(x.revenue), payg: r2(x.payg), packs: r2(x.packs), hybrid: r2(x.hybrid), cheapest: x.cheapest, chosen: build === s.build};
-        }),
         heat: shares.flatMap((pct) => counts.map((u) => ({licence_pct: pct, users: u, current: u === s.users && pct === Math.round(s.lic * 100),
           revenue_month: r2(buy(month(acts, rate, {...s, lic: pct / 100}, u, 1).before * (1 + buffer), rate, basis).revenue)}))),
       };
@@ -673,7 +740,22 @@ dash.calc('book', {
       change_pct: p.n && today.revenue_year ? r2(100 * (p.revenue_year / today.revenue_year - 1)) : null,
       cumulative: p.n ? r2(sum += p.revenue_year) : null}));
     let run = 0;
+    // The whole portfolio built one way or the other: every modelled agent switched, planned agents as entered.
+    const modelled = engine.agents.length;
+    const builds = Object.keys(BUILDS).map((build) => {
+      const bought = PERIODS.map((x, n) => buy(agents.filter((a) => n >= a.starts).reduce((t, a) => t + (a.alt ? a.alt[build][n] : a.credits[n]), 0), rate, basis));
+      const credits = agents.reduce((t, a) => t + (a.starts ? 0 : a.alt ? a.alt[build][0] : a.credits[0]), 0);
+      const on = engine.agents.filter((a) => a.s_build === build).length;
+      return {build_id: build, build: BUILDS[build], credits_month: r2(credits), revenue_month: r2(bought[0].revenue), revenue_year: r2(bought[0].revenue * 12),
+        three_year: r2(bought.slice(1).reduce((t, b) => t + b.revenue * 12, 0)), agents_on: on, agents_modelled: modelled,
+        in_use: on === 0 ? 'No' : on === modelled ? 'All' : 'Some'};
+    });
+    const top = Math.max(...builds.map((b) => b.revenue_month)), low = Math.min(...builds.map((b) => b.revenue_month));
+    builds.forEach((b) => Object.assign(b, {higher: modelled > 0 && top > low && b.revenue_month === top, scale_pct: top ? r2(100 * b.revenue_month / top) : 0,
+      times_other: b.revenue_month === top && low > 0 ? r2(top / low) : null,
+      credit_ratio: builds[0].credits_month ? r2(builds[1].credits_month / builds[0].credits_month) : null}));
     return {
+      builds,
       forecast,
       split: periods.flatMap((p) => agents.map((a) => ({period: p.period, n: p.n, agent_id: a.agent_id, agent: a.agent, kind: a.kind,
         users: p.n >= a.starts ? a.users[p.n] : 0, revenue_year: r2(share(a, p.n) * 12)}))),
@@ -701,12 +783,12 @@ view('forecast', 'book', 'Three-year forecast', `Today, then each year with user
 view('forecast_agents', 'book', 'Forecast by agent', `Each agent's share of every year's revenue.`, (book) => book.split);
 view('runway', 'book', 'Cumulative revenue by month', 'Revenue added month by month over the three forecast years.', (book) => book.runway);
 view('agent_totals', 'book', 'Agents in the portfolio', 'One line per agent: users, credits, revenue today and in Year 3.', (book) => book.agents);
+view('build_compare', 'book', 'Standard agent against Copilot harness, whole portfolio', 'Revenue if every modelled agent were built as a standard agent, and if every one ran on the Copilot harness, everything else as set. Planned agents count the same either way.', (book) => book.builds);
 view('purchase', 'book', 'Ways to buy the credits', `This month's portfolio credits priced three ways.`, (book) => book.purchase);
 view('agent_now', 'engine', 'Selected agent today', `The selected agent at the settings on the page, line for line with the workbook's Monthly Estimate.`, (engine) => (engine.detail ? [engine.detail.now] : []));
 view('activity_credits', 'engine', 'Credits by activity', 'Monthly volume and credits of every prompt and scenario of the selected agent, before the buffer.', (engine) => (engine.detail ? engine.detail.rows : []));
 view('waterfall', 'engine', 'How the monthly credits build up', 'Quote, extra work, other scenarios and buffer credits of the selected agent.', (engine) => (engine.detail ? engine.detail.waterfall : []));
 view('meters', 'engine', 'Credits by billing meter', `The selected agent's monthly credits by what is billed, before the buffer.`, (engine) => (engine.detail ? engine.detail.meters : []));
-view('builds', 'engine', 'Standard agent against Copilot harness', 'The selected agent built either way at the same settings.', (engine) => (engine.detail ? engine.detail.builds : []));
 view('heat', 'engine', 'Revenue by users and licence share', 'Monthly revenue of the selected agent at other user counts and licence shares, everything else as set.', (engine) => (engine.detail ? engine.detail.heat : []));
 
 })();
@@ -899,10 +981,36 @@ dash.draw('chart-meters', (box) => {
   if (got) bars(box, got[0], {label: (d) => d.meter, value: (d) => d.credits_month, text: (d) => fmts.num(d.credits_month), sub: (d) => fmts.pct(d.share_pct), color: () => paint(0),
     tip: (d) => [fmts.dec(d.credits_month) + ' credits a month', fmts.pct(d.share_pct) + ' of the credits before the buffer']});
 });
-dash.draw('chart-builds', (box) => {
-  const got = ready(box, 'builds');
-  if (got) bars(box, got[0], {label: (d) => d.build, sub: (d) => (d.chosen ? 'Selected for this agent' : ''), value: (d) => d.revenue_month, text: (d) => fmts.usd0(d.revenue_month),
-    color: (d) => (d.chosen ? paint(0) : ''), tip: (d) => [fmts.num(d.credits_month) + ' credits a month', 'Cheapest to buy: ' + d.cheapest]});
+// The two builds side by side at the top: whichever earns more is the green one.
+dash.draw('hero-builds', (box) => {
+  const got = ready(box, 'build_compare', 'agents');
+  if (!got) return;
+  const [rows, agents] = got, ids = agents.map((a) => a.agent_id);
+  const card = (r) => {
+    const c = h('article', 'cc-build ' + (r.higher ? 'cc-build-win' : 'cc-build-alt')), head = h('div', 'cc-build-head');
+    c.setAttribute('aria-label', r.build + ': ' + fmts.usd0(r.revenue_month) + ' a month' + (r.higher ? ', the higher revenue' : ''));
+    head.append(h('span', 'cc-build-name', r.build));
+    if (r.in_use !== 'No') head.append(h('span', 'cc-badge', r.in_use === 'All' ? 'In use' : 'In use by ' + r.agents_on + ' of ' + r.agents_modelled));
+    if (r.higher) head.append(h('span', 'cc-badge cc-badge-win', r.times_other ? '▲ ' + fmts.dec(Math.round(r.times_other * 10) / 10) + '× more revenue' : '▲ Higher revenue'));
+    const big = h('p', 'cc-build-v', fmts.usd0(r.revenue_month));
+    big.append(h('small', '', 'a month'));
+    const sub = h('p', 'cc-build-sub');
+    sub.append(h('b', '', fmts.usd(r.revenue_year)), ' a year ', h('span', 'cc-hero-dot', '·'), ' ', h('b', '', fmts.usd(r.three_year)), ' over three years');
+    const track = h('div', 'cc-build-track'), fill = h('i');
+    fill.style.width = Math.max(1.5, r.scale_pct) + '%';
+    track.append(fill);
+    c.append(head, big, sub, track, h('p', 'cc-build-foot', fmts.num(r.credits_month) + ' credits a month'));
+    if (r.in_use !== 'All' && ids.length) {
+      const go = h('button', 'cc-build-use', ids.length > 1 ? 'Switch every agent to this build' : 'Switch to this build');
+      go.type = 'button';
+      go.addEventListener('click', () => dash.setParams(Object.fromEntries(ids.map((id) => [id + '_build', r.build_id]))));
+      c.append(go);
+    }
+    return c;
+  };
+  const vs = h('div', 'cc-vs', 'vs');
+  vs.setAttribute('aria-hidden', 'true');
+  box.replaceChildren(card(rows[0]), vs, ...rows.slice(1).map(card));
 });
 dash.draw('chart-heat', (box) => {
   const got = ready(box, 'heat');

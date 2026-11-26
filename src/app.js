@@ -184,10 +184,36 @@ dash.draw('chart-meters', (box) => {
   if (got) bars(box, got[0], {label: (d) => d.meter, value: (d) => d.credits_month, text: (d) => fmts.num(d.credits_month), sub: (d) => fmts.pct(d.share_pct), color: () => paint(0),
     tip: (d) => [fmts.dec(d.credits_month) + ' credits a month', fmts.pct(d.share_pct) + ' of the credits before the buffer']});
 });
-dash.draw('chart-builds', (box) => {
-  const got = ready(box, 'builds');
-  if (got) bars(box, got[0], {label: (d) => d.build, sub: (d) => (d.chosen ? 'Selected for this agent' : ''), value: (d) => d.revenue_month, text: (d) => fmts.usd0(d.revenue_month),
-    color: (d) => (d.chosen ? paint(0) : ''), tip: (d) => [fmts.num(d.credits_month) + ' credits a month', 'Cheapest to buy: ' + d.cheapest]});
+// The two builds side by side at the top: whichever earns more is the green one.
+dash.draw('hero-builds', (box) => {
+  const got = ready(box, 'build_compare', 'agents');
+  if (!got) return;
+  const [rows, agents] = got, ids = agents.map((a) => a.agent_id);
+  const card = (r) => {
+    const c = h('article', 'cc-build ' + (r.higher ? 'cc-build-win' : 'cc-build-alt')), head = h('div', 'cc-build-head');
+    c.setAttribute('aria-label', r.build + ': ' + fmts.usd0(r.revenue_month) + ' a month' + (r.higher ? ', the higher revenue' : ''));
+    head.append(h('span', 'cc-build-name', r.build));
+    if (r.in_use !== 'No') head.append(h('span', 'cc-badge', r.in_use === 'All' ? 'In use' : 'In use by ' + r.agents_on + ' of ' + r.agents_modelled));
+    if (r.higher) head.append(h('span', 'cc-badge cc-badge-win', r.times_other ? '▲ ' + fmts.dec(Math.round(r.times_other * 10) / 10) + '× more revenue' : '▲ Higher revenue'));
+    const big = h('p', 'cc-build-v', fmts.usd0(r.revenue_month));
+    big.append(h('small', '', 'a month'));
+    const sub = h('p', 'cc-build-sub');
+    sub.append(h('b', '', fmts.usd(r.revenue_year)), ' a year ', h('span', 'cc-hero-dot', '·'), ' ', h('b', '', fmts.usd(r.three_year)), ' over three years');
+    const track = h('div', 'cc-build-track'), fill = h('i');
+    fill.style.width = Math.max(1.5, r.scale_pct) + '%';
+    track.append(fill);
+    c.append(head, big, sub, track, h('p', 'cc-build-foot', fmts.num(r.credits_month) + ' credits a month'));
+    if (r.in_use !== 'All' && ids.length) {
+      const go = h('button', 'cc-build-use', ids.length > 1 ? 'Switch every agent to this build' : 'Switch to this build');
+      go.type = 'button';
+      go.addEventListener('click', () => dash.setParams(Object.fromEntries(ids.map((id) => [id + '_build', r.build_id]))));
+      c.append(go);
+    }
+    return c;
+  };
+  const vs = h('div', 'cc-vs', 'vs');
+  vs.setAttribute('aria-hidden', 'true');
+  box.replaceChildren(card(rows[0]), vs, ...rows.slice(1).map(card));
 });
 dash.draw('chart-heat', (box) => {
   const got = ready(box, 'heat');

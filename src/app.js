@@ -169,7 +169,7 @@ const GROUPS = ['Quote', 'Advisor', 'Other'];
 dash.draw('chart-waterfall', (box) => {
   const got = ready(box, 'waterfall');
   if (got) bars(box, got[0], {label: (d) => d.step, from: (d) => d.from, value: (d) => d.to - d.from, text: (d) => fmts.num(d.credits),
-    color: (d, i) => (d.total ? 'var(--color-fg-muted)' : i < 3 ? paint(i) : ''), tip: (d) => [fmts.dec(d.credits) + ' credits a month', d.total ? 'Everything, buffer included' : 'Running total ' + fmts.num(d.to)]});
+    color: (d) => (d.total ? 'var(--color-fg-muted)' : GROUPS.includes(d.group) ? paint(GROUPS.indexOf(d.group)) : ''), tip: (d) => [fmts.dec(d.credits) + ' credits a month', d.total ? 'Everything, buffer included' : 'Running total ' + fmts.num(d.to)]});
 });
 dash.draw('chart-activities', (box) => {
   const got = ready(box, 'activity_credits', 'waterfall');
@@ -177,7 +177,7 @@ dash.draw('chart-activities', (box) => {
   const rows = got[0].filter((r) => r.credits_month > 0).sort((a, b) => b.credits_month - a.credits_month);
   bars(box, rows, {label: (d) => d.activity, sub: (d) => fmts.num(d.volume_month) + ' a month, ' + fmts.dec(d.credits_each) + ' credits each on average', value: (d) => d.credits_month,
     text: (d) => fmts.num(d.credits_month), color: (d) => paint(GROUPS.indexOf(d.group)), tip: (d) => [fmts.pct(d.share_pct) + ' of the credits before the buffer', 'Volume driven by: ' + d.follows.toLowerCase(), d.note]},
-  legend(got[1].slice(0, 3).map((s, i) => [s.step, paint(i)])));
+  legend(got[1].filter((s) => GROUPS.includes(s.group)).map((s) => [s.step, paint(GROUPS.indexOf(s.group))])));
 });
 dash.draw('chart-meters', (box) => {
   const got = ready(box, 'meters');
@@ -185,7 +185,6 @@ dash.draw('chart-meters', (box) => {
     tip: (d) => [fmts.dec(d.credits_month) + ' credits a month', fmts.pct(d.share_pct) + ' of the credits before the buffer']});
 });
 // One card per agent. The tick decides what counts; Adjust picks the agent the sliders change.
-const PARTS = ['Quotes', 'Advisor drafts', 'Other scenarios'];
 let pickSearch = null, pickBox = null;
 const pickFilter = () => {
   const q = pickSearch ? pickSearch.value.trim().toLowerCase() : '';
@@ -231,7 +230,7 @@ dash.draw('agent-cards', (box) => {
       const parts = h('div', 'cc-ag-parts'), bar = h('div', 'cc-ag-stack'), keys = h('div', 'cc-ag-keys');
       parts.append(h('span', 'cc-ag-k', 'Covers ' + c.covers + ' activities'));
       c.parts.forEach((x) => {
-        const i = PARTS.indexOf(x.part) < 0 ? 0 : PARTS.indexOf(x.part), seg = h('i'), key = h('span', 'cc-key'), sw = h('span', 'cc-swatch');
+        const i = Math.max(0, GROUPS.indexOf(x.group)), seg = h('i'), key = h('span', 'cc-key'), sw = h('span', 'cc-swatch');
         seg.style.width = x.pct + '%'; seg.style.background = paint(i); seg.title = x.part + ': ' + fmts.pct(x.pct);
         sw.style.background = paint(i); key.append(sw, x.part + ' ' + Math.round(x.pct) + '%');
         bar.append(seg); keys.append(key);
@@ -291,17 +290,18 @@ dash.draw('hero-builds', (box) => {
 dash.draw('chart-heat', (box) => {
   const got = ready(box, 'heat');
   if (!got) return;
-  const rows = got[0], users = [...new Set(rows.map((r) => r.users))], shares = [...new Set(rows.map((r) => r.licence_pct))];
+  const rows = got[0], cols = [...new Set(rows.map((r) => r.col))], shares = [...new Set(rows.map((r) => r.licence_pct))];
+  const byShare = rows.length && rows[0].col_kind === 'share', name = (c) => (byShare ? c + '%' : fmts.int(c));
   const max = d3.max(rows, (r) => r.revenue_month) || 1, tip = tipOn(box), table = h('table', 'cc-heat'), head = h('tr');
-  head.append(h('th', '', ''), ...users.map((u) => h('th', '', fmts.int(u))));
+  head.append(h('th', '', ''), ...cols.map((c) => h('th', '', name(c))));
   table.append(head);
   shares.forEach((s) => {
     const tr = h('tr');
     tr.append(h('th', '', s + '%'));
-    users.forEach((u) => {
-      const r = rows.find((d) => d.users === u && d.licence_pct === s), td = h('td', r.current ? 'cc-here' : '', fmts.usd(r.revenue_month));
+    cols.forEach((c) => {
+      const r = rows.find((d) => d.col === c && d.licence_pct === s), td = h('td', r.current ? 'cc-here' : '', fmts.usd(r.revenue_month));
       td.style.background = 'color-mix(in srgb, ' + paint(0) + ' ' + Math.round(6 + 49 * r.revenue_month / max) + '%, transparent)';
-      hover(td, tip, fmts.int(u) + ' users, ' + s + '% licensed', [fmts.usd2(r.revenue_month) + ' a month', r.current ? 'The current setting' : '']);
+      hover(td, tip, (byShare ? c + '% of interactions evaluated' : fmts.int(c) + ' users') + ', ' + s + '% licensed', [fmts.usd2(r.revenue_month) + ' a month', r.current ? 'The current setting' : '']);
       tr.append(td);
     });
     table.append(tr);
@@ -359,6 +359,11 @@ dash.onData(() => {
   if (a) agent = a.agent_id;
   const values = {agent: a ? {users: a.users, units: a.units_per_user, extra: a.extra_per_month, lic: a.licence_pct, build: a.s_build, model: a.s_model, rule: a.s_rule, other: a.s_other} : {},
     all: p ? {basis: p.s_basis, buffer: p.buffer_pct, growth: p.growth_pct} : {}};
+  if (a) all('.cc [data-p=units]').forEach((el) => {
+    const cap = el.type === 'range' ? a.units_max : a.unit_mode === 'share' ? 100 : 1000;
+    if (String(el.max) !== String(cap)) el.max = cap;
+    if (String(el.step) !== String(a.units_step)) el.step = a.units_step;
+  });
   all('.cc [data-p]').forEach((el) => {
     const v = values[el.dataset.scope === 'agent' ? 'agent' : 'all'][el.dataset.p];
     if (v !== undefined && document.activeElement !== el && String(el.value) !== String(v)) el.value = v;

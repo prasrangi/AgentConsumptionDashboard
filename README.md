@@ -14,12 +14,12 @@ rates are those recorded in the calculator workbook.
 
 ## Assumptions at a glance
 
-These are the assumptions behind every figure on the page, in plain terms. They describe the
-Proposal Agent at its starting settings. The use, licence, build, purchase and growth assumptions can
+These are the assumptions behind every figure on the page, in plain terms. They describe the two
+agents in the dashboard, the Proposal Agent and the QEV Agent, at their starting settings. The use, licence, build, purchase and growth assumptions can
 be changed with the sliders and dropdowns on the page. Prices and credit rates come from the
 calculator workbook and change only when the data is refreshed from it.
 
-### What we assumed about the agent's use
+### What we assumed about the Proposal Agent's use
 
 | # | Assumption | Starting value |
 |---|---|---|
@@ -33,6 +33,23 @@ calculator workbook and change only when the data is refreshed from it.
 | 8 | What a licence covers | Licensed sellers are not charged for the agent's conversations, but still pay for background automation (milestone notices, tender page reading, automatic runs). A cautious option charges them for tools and drafting too. |
 | 9 | How the agent is built | As a standard agent. The Copilot harness is an alternative build and uses far more credits (about 24 times as many at these settings). |
 | 10 | Drafting model | Standard. The Premium model costs more per draft. |
+
+### What we assumed about the QEV Agent's use
+
+The QEV Agent evaluates the quality of closed customer interactions. Its workbook offers a Low,
+Average and High case; the dashboard uses the Average case, which is the one the workbook has in use.
+
+| # | Assumption | Starting value |
+|---|---|---|
+| Q1 | Customer interactions a year | 13,000,000 |
+| Q2 | Share of interactions evaluated | 10%, so about 108,333 evaluations a month. This is the main slider for this agent. |
+| Q3 | Credits for one evaluation | About 25 on the standard agent (evidence checks, an AI judgement, a quality agent run to score the form, the result sent to the advisor); about 409 on the Copilot harness |
+| Q4 | Harder evaluations | 20% need the agent to orchestrate extra look-ups; 5% are disputed by the advisor |
+| Q5 | Quality agent run | 7.5 credits each, once per evaluation and for calibration and tuning runs |
+| Q6 | People who chat with the agent | 100 QA evaluators and team leads, 20 questions each a month, half of them with a Microsoft Copilot licence |
+| Q7 | Other monthly work | Weekly scorecards and 1:1 briefs for 1,000 advisors, calibration, a monthly review, document reading and scheduled sampling, as set in the workbook |
+| Q8 | Drafting model | Standard. Basic costs less, Premium more. |
+| Q9 | Platform overhead | Polling checks, build sessions, test runs and quality agent tuning stay flat as volumes grow |
 
 ### What we assumed about price
 
@@ -66,12 +83,14 @@ calculator workbook and change only when the data is refreshed from it.
 
 | | Users | Revenue a month | Revenue for the year |
 |---|---|---|---|
-| Today | 100 | $935 | $11,225 |
-| Year 1 | 110 | $1,028 | $12,332 |
-| Year 2 | 121 | $1,129 | $13,550 |
-| Year 3 | 133 | $1,240 | $14,878 |
+| Today | 200 | $32,796 | $393,556 |
+| Year 1 | 220 | $36,070 | $432,845 |
+| Year 2 | 242 | $39,672 | $476,062 |
+| Year 3 | 266 | $43,601 | $523,208 |
 
-That is about $40,800 over the three years, 32.5% above today by Year 3. These are planning
+That is about $1.43 million over the three years, 32.9% above today by Year 3. The QEV Agent is
+$31,861 of today's $32,796 a month and the Proposal Agent $935. Users are the two agents' users
+added together. On the Copilot harness the same two agents would come to about $552,000 a month. These are planning
 figures. The volumes above are illustrative until real usage replaces them, so treat the totals as a
 way to compare scenarios, not as a commitment.
 
@@ -95,12 +114,14 @@ The page updates about a minute after the push.
 
 ## Adding an agent
 
-Each agent comes from its own calculator workbook with the same sheets as the Proposal Agent one
-(Inputs, Standard Agent, Copilot Harness Agent, Other Scenarios).
+Each agent comes from its own calculator workbook with the sheets Inputs, Standard Agent, Copilot
+Harness Agent and Other Scenarios. Both workbook layouts in use are read: the Proposal Agent's, where
+work is counted per user, and the newer QEV Agent's, with its Low / Average / High switch and work
+counted as a share of a business volume.
 
 ```
 pip install openpyxl
-python3 tools/extract_calculator.py data proposal="Copilot Credit Calculator - Proposal Agent.xlsx" tender="Copilot Credit Calculator - Tender Agent.xlsx"
+python3 tools/extract_calculator.py data proposal="Copilot Credit Calculator - Proposal Agent.xlsx" qev="Copilot Credit Calculator - QEV Agent.xlsx"
 python3 tools/build.py
 ```
 

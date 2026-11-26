@@ -1,5 +1,6 @@
 .cc { --cc-a: var(--color-fg); container-type: inline-size; display: grid; gap: var(--cds-gap-lg); font-family: var(--font-anthropic-sans); font-size: var(--cds-font-size-body); color: var(--color-fg); }
 .cc * { box-sizing: border-box; }
+.cc [hidden] { display: none !important; }
 /* the top of the page: a blue band that holds the headline and the two builds */
 .cc-hero { --hx-fg: #ffffff; --hx-muted: #d3dcea; --hx-line: rgba(255, 255, 255, .22); --hx-up: #5ee39a; --bx-fg: #0e1f36; --bx-line: rgba(14, 31, 54, .14);
   position: relative; isolation: isolate; overflow: hidden; display: grid; gap: 14px; padding: 26px 28px 20px; border-radius: 18px; color: var(--hx-fg);

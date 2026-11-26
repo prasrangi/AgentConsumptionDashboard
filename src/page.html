@@ -89,6 +89,7 @@
 <div class='cc-ctl'>
 <span class='cc-ctl-name' id='l-model'>AI model for drafting</span>
 <select class='dash-select' data-p='model' data-scope='agent' data-std aria-labelledby='l-model'>
+<option value='Basic'>Basic</option>
 <option value='Standard'>Standard</option>
 <option value='Premium'>Premium</option>
 </select>
@@ -241,9 +242,9 @@
 <div class='cc-chart dash-skeleton' id='chart-activities' style='--cc-h: 240px' data-draw='chart-activities' data-source='activity_credits waterfall' aria-label='Bars of monthly credits by activity, largest first'></div>
 </div>
 <div class='cc-card cc-wide' id='card-heat'>
-<h3 class='cc-h3'>Revenue a month at other user counts and licence shares</h3>
-<p class='cc-note'>Columns are users, rows the share of them holding a Microsoft Copilot licence. The outlined cell is the current setting; everything else stays as set.</p>
-<div class='cc-chart dash-skeleton' id='chart-heat' style='--cc-h: 200px' data-draw='chart-heat' data-source='heat' aria-label='Grid of monthly revenue by number of users and share of licensed users'></div>
+<h3 class='cc-h3'>Revenue a month at other volumes and licence shares</h3>
+<p class='cc-note'>Columns are <span data-draw='v' data-source='agent_now' data-field='heat_cols' data-row='0'>—</span>, rows the share of users holding a Microsoft Copilot licence. The outlined cell is the current setting; everything else stays as set.</p>
+<div class='cc-chart dash-skeleton' id='chart-heat' style='--cc-h: 200px' data-draw='chart-heat' data-source='heat' aria-label='Grid of monthly revenue by volume and share of licensed users'></div>
 </div>
 </div>
 <details class='cc-card cc-details' id='activity-table'>

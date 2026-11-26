@@ -1,23 +1,47 @@
 {
  "source": [
-  "Copilot Credit Calculator - Proposal Agent.xlsx"
+  "Copilot Credit Calculator - Proposal Agent.xlsx",
+  "Copilot Credit Calculator - QEV Agent.xlsx"
  ],
  "rows": [
   {
    "agent_id": "proposal",
    "agent": "Proposal Agent",
    "unit": "quote",
+   "build": "Standard",
+   "workbook": "Copilot Credit Calculator - Proposal Agent.xlsx",
    "users_label": "Sellers using the agent",
    "units_label": "Quotes per seller per month",
    "extra_label": "Advisor drafts per month",
    "users": 100,
    "units_per_user": 10,
    "extra_per_month": 50,
+   "unit_mode": "per_user",
+   "units_max": 60,
+   "units_step": 1,
    "licence_pct": 50.0,
    "model": "Standard",
-   "licence_rule": "Guide",
+   "licence_rule": "Guide"
+  },
+  {
+   "agent_id": "qev",
+   "agent": "QEV Agent",
+   "unit": "evaluation",
    "build": "Standard",
-   "workbook": "Copilot Credit Calculator - Proposal Agent.xlsx"
+   "workbook": "Copilot Credit Calculator - QEV Agent.xlsx",
+   "users_label": "Users who chat with the agent",
+   "units_label": "Share of interactions evaluated, %",
+   "extra_label": null,
+   "users": 100,
+   "units_per_user": 10.0,
+   "extra_per_month": 0,
+   "unit_mode": "share",
+   "unit_pool_month": 1083333.3333333333,
+   "units_max": 100,
+   "units_step": 1,
+   "licence_pct": 50.0,
+   "model": "Standard",
+   "licence_rule": "Guide"
   }
  ]
 }

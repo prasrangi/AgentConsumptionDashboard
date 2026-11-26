@@ -7,8 +7,8 @@ const PERIODS = ['Today', 'Year 1', 'Year 2', 'Year 3'];
 const BUILDS = {standard: 'Standard agent', harness: 'Copilot harness agent'};
 const BASES = {payg: 'Pay-as-you-go', packs: 'Packs only', hybrid: 'Packs plus pay-as-you-go', lowest: 'Lowest of the three'};
 const METERS = [['Replies', 'replies', 'reply'], ['Tool calls', 'tool_calls', 'tool_call'], ['Graph searches', 'graph_searches', 'graph_search'],
-  ['AI drafting', 'ai_tokens_k', 'ai'], ['Flow steps', 'flow_steps', 'flow_step'], ['Page reads', 'pages', 'page_read']];
-const TASKS = {Light: 'Light tasks', Medium: 'Medium tasks', Heavy: 'Heavy tasks', 'Flow steps': 'Flow steps', 'Per unit': 'Per-unit meters', Build: 'Build sessions'};
+  ['AI drafting', 'ai_tokens_k', 'ai'], ['Flow steps', 'flow_steps', 'flow_step'], ['Page reads', 'pages', 'page_read'], ['Quality agent runs', 'quality_runs', 'quality_run']];
+const TASKS = {Light: 'Light tasks', Medium: 'Medium tasks', Heavy: 'Heavy tasks', 'Flow steps': 'Flow steps', 'Per unit': 'Per-unit meters', Build: 'Build sessions', 'Build session': 'Build sessions', 'Product agent': 'Quality agent runs'};
 
 // The three ways to buy a month of credits, as on the workbook's Monthly Estimate sheet.
 const buy = (credits, rate, basis) => {
@@ -28,7 +28,7 @@ const settings = (a, P) => {
     users: Math.max(0, Math.round(num(g('users', a.users)))), units: Math.max(0, num(g('units', a.units_per_user))),
     extra: Math.max(0, num(g('extra', a.extra_per_month))), lic: Math.min(100, Math.max(0, num(g('lic', a.licence_pct)))) / 100,
     build: g('build', String(a.build).toLowerCase().includes('harness') ? 'harness' : 'standard') === 'harness' ? 'harness' : 'standard',
-    model: g('model', a.model) === 'Premium' ? 'Premium' : 'Standard',
+    model: ['Basic', 'Premium'].includes(g('model', a.model)) ? g('model', a.model) : 'Standard',
     rule: g('rule', a.licence_rule === 'Conservative' ? 'conservative' : 'guide') === 'conservative' ? 'conservative' : 'guide',
     other: g('other', 'in') === 'out' ? 'out' : 'in',
   };
@@ -36,18 +36,19 @@ const settings = (a, P) => {
 
 // One month of one agent: users is the user count, grow multiplies the usage volumes that are set on their own.
 const month = (acts, rate, s, users, grow) => {
-  const ai = s.model === 'Premium' ? rate.ai_premium : rate.ai_standard;
+  const ai = s.model === 'Premium' ? rate.ai_premium : s.model === 'Basic' ? num(rate.ai_basic, rate.ai_standard) : rate.ai_standard;
   const out = {rows: [], groups: {Quote: 0, Advisor: 0, Other: 0}, meters: {}, unit: 0, unitLicensed: 0};
   for (const a of acts) {
     if (a.group === 'Other' && s.other === 'out') continue;
-    const parts = METERS.map(([, col, key]) => num(a[col]) * (key === 'ai' ? ai : rate[key]));
+    const parts = METERS.map(([, col, key]) => num(a[col]) * (key === 'ai' ? ai : num(rate[key])));
     const full = parts.reduce((x, y) => x + y, 0);
     const charged = (i) => a.licensed_pay === 'Yes' || (s.rule === 'conservative' && i !== 0 && i !== 2);
     const licensed = parts.reduce((x, y, i) => x + (charged(i) ? y : 0), 0);
-    const t = a.harness_task;
+    const t = String(a.harness_task || '').replace(/ task$/, '');
     const harness = t === 'Light' ? rate.light : t === 'Medium' ? rate.medium : t === 'Heavy' ? rate.heavy
-      : t === 'Flow steps' ? num(a.flow_steps) * rate.harness_flow_step : t === 'Per unit' ? full : t === 'Build' ? rate.build_session : 0;
-    const volume = a.driver === 'unit' ? users * s.units * a.volume : a.driver === 'user' ? users * a.volume
+      : t === 'Flow steps' ? num(a.flow_steps) * rate.harness_flow_step : t === 'Per unit' ? full : t === 'Build' || t === 'Build session' ? rate.build_session
+      : t === 'Product agent' ? num(rate.quality_run) : 0;
+    const volume = a.driver === 'unit' ? unitsIn(s, users, grow) * a.volume : a.driver === 'user' ? users * a.volume
       : (a.driver === 'extra' ? s.extra : 1) * a.volume * (a.scaling === 'usage' ? grow : 1);
     const each = s.build === 'harness' ? harness : (1 - s.lic) * full + s.lic * licensed;
     const credits = volume * each;
@@ -63,6 +64,8 @@ const month = (acts, rate, s, users, grow) => {
   return out;
 };
 const usersIn = (users, growth, n) => Math.round(users * (1 + growth) ** n);
+// Units of work a month: per user (quotes per seller), or a share of a business volume (share of interactions evaluated).
+const unitsIn = (s, users, grow) => (s.unitMode === 'share' ? s.pool * s.units / 100 * grow : users * s.units);
 
 dash.calc('engine', {
   title: 'Agent credit model',
@@ -78,39 +81,47 @@ dash.calc('engine', {
     const out = {rate, buffer, growth, basis, off, agents: [], detail: null};
     for (const a of agents) {
       const acts = activities.filter((x) => x.agent_id === a.agent_id);
-      const s = {...settings(a, P), unitName: a.unit};
+      const s = {...settings(a, P), unitName: a.unit, unitMode: a.unit_mode || 'per_user', pool: num(a.unit_pool_month)};
       const users = PERIODS.map((p, n) => usersIn(s.users, growth, n));
       const grow = users.map((u, n) => (s.users ? u / s.users : (1 + growth) ** n));
       const alt = Object.fromEntries(Object.keys(BUILDS).map((build) => [build, users.map((u, n) => month(acts, rate, {...s, build}, u, grow[n]).before * (1 + buffer))]));
       const now = month(acts, rate, s, s.users, 1), partName = a.unit[0].toUpperCase() + a.unit.slice(1) + 's';
-      const parts = [[partName, now.groups.Quote], [String(a.extra_label || 'Extra work').replace(/ per month$/i, ''), now.groups.Advisor], ['Other scenarios', now.groups.Other]]
-        .filter(([, v]) => v > 0).map(([part, v]) => ({part, pct: now.before ? r2(100 * v / now.before) : 0}));
+      const parts = [[partName, now.groups.Quote, 'Quote'], [String(a.extra_label || 'Extra work').replace(/ per month$/i, ''), now.groups.Advisor, 'Advisor'], ['Other scenarios', now.groups.Other, 'Other']]
+        .filter(([, v]) => v > 0).map(([part, v, group]) => ({part, group, pct: now.before ? r2(100 * v / now.before) : 0}));
       out.agents.push({agent_id: a.agent_id, agent: a.agent, kind: 'Modelled', build: BUILDS[s.build], s_build: s.build, starts: 0, users, credits: alt[s.build], alt,
         on: !off.has(a.agent_id), users_label: a.users_label, parts, covers: [...new Set(acts.filter((x) => num(x.volume) > 0).map((x) => x.activity))].length});
       if (a !== chosen) continue;
       const m = month(acts, rate, s, s.users, 1), total = m.before * (1 + buffer), b = buy(total, rate, basis);
       const extraName = String(a.extra_label || 'Extra work').replace(/ per month$/i, ''), unitsName = a.unit[0].toUpperCase() + a.unit.slice(1) + 's';
-      const steps = [[unitsName, m.groups.Quote], [extraName, m.groups.Advisor], ['Other scenarios', m.groups.Other], ['Safety buffer', m.before * buffer]];
+      const steps = [[unitsName, m.groups.Quote, 'Quote'], [extraName, m.groups.Advisor, 'Advisor'], ['Other scenarios', m.groups.Other, 'Other'], ['Safety buffer', m.before * buffer, 'Buffer']]
+        .filter(([, v, group]) => group !== 'Advisor' || a.extra_label || v);
+      const unitsMonth = unitsIn(s, s.users, 1);
       let at = 0;
       const sorted = Object.entries(m.meters).sort((x, y) => y[1] - x[1]);
       const shares = [...new Set([0, 20, 40, 60, 80, 100, Math.round(s.lic * 100)])].sort((x, y) => y - x);
-      const counts = [...new Set([0.5, 0.75, 1, 1.5, 2, 3].map((k) => Math.round((s.users || num(a.users, 100)) * k)))];
+      // The heat map's columns: user counts, or for an agent whose work is a share of a business volume, that share.
+      const byShare = s.unitMode === 'share';
+      const cols = byShare ? [...new Set([5, 10, 15, 20, 30, 50, Math.round(s.units)])].filter((c) => c <= 100).sort((x, y) => x - y)
+        : [...new Set([0.5, 0.75, 1, 1.5, 2, 3].map((k) => Math.round((s.users || num(a.users, 100)) * k)))];
       const built = ['standard', 'harness'].map((build) => month(acts, rate, {...s, build}, s.users, 1).before * (1 + buffer));
       out.detail = {
         now: {agent_id: a.agent_id, agent: a.agent, unit: a.unit, users_label: a.users_label, units_label: a.units_label, extra_label: a.extra_label,
           build: BUILDS[s.build], s_build: s.build, s_model: s.model, s_rule: s.rule, s_other: s.other,
           users: s.users, units_per_user: s.units, extra_per_month: s.extra, licence_pct: Math.round(s.lic * 100),
-          units_month: r2(s.users * s.units), credits_per_unit: r2(m.unit), credits_per_unit_licensed: r2(m.unitLicensed),
-          cost_per_unit: s.users * s.units ? r2(m.groups.Quote * (1 + buffer) * rate.price_per_credit / (s.users * s.units)) : 0,
+          units_month: r2(unitsMonth), credits_per_unit: r2(m.unit), credits_per_unit_licensed: r2(m.unitLicensed),
+          cost_per_unit: unitsMonth ? r2(m.groups.Quote * (1 + buffer) * rate.price_per_credit / unitsMonth) : 0,
+          unit_mode: s.unitMode, units_max: num(a.units_max, 60), units_step: num(a.units_step, 1), unit_pool_month: s.pool,
           credits_month: r2(total), without_other: r2((m.groups.Quote + m.groups.Advisor) * (1 + buffer)),
           payg: r2(b.payg), packs: r2(b.packs), hybrid: r2(b.hybrid), packs_needed: b.needed, cheapest: b.cheapest, lowest: r2(b.lowest),
-          credits_per_user: s.users ? r2(m.before / s.users) : 0, harness_ratio: built[0] ? r2(built[1] / built[0]) : null, workbook: a.workbook},
+          credits_per_user: s.users ? r2(m.before / s.users) : 0, harness_ratio: built[0] ? r2(built[1] / built[0]) : null, workbook: a.workbook,
+          heat_cols: byShare ? 'the share of interactions evaluated' : 'users'},
         rows: m.rows.map((r) => ({...r, share_pct: m.before ? r2(100 * r.credits_month / m.before) : 0})),
-        waterfall: steps.map(([step, v]) => ({step, credits: r2(v), from: r2(at), to: r2(at += v), total: false}))
+        waterfall: steps.map(([step, v, group]) => ({step, group, credits: r2(v), from: r2(at), to: r2(at += v), total: false}))
           .concat({step: 'Total credits', credits: r2(total), from: 0, to: r2(total), total: true}),
         meters: sorted.map(([meter, v]) => ({meter, credits_month: r2(v), share_pct: m.before ? r2(100 * v / m.before) : 0})),
-        heat: shares.flatMap((pct) => counts.map((u) => ({licence_pct: pct, users: u, current: u === s.users && pct === Math.round(s.lic * 100),
-          revenue_month: r2(buy(month(acts, rate, {...s, lic: pct / 100}, u, 1).before * (1 + buffer), rate, basis).revenue)}))),
+        heat: shares.flatMap((pct) => cols.map((c) => ({licence_pct: pct, col: c, col_kind: byShare ? 'share' : 'users', users: byShare ? s.users : c,
+          current: (byShare ? c === Math.round(s.units) : c === s.users) && pct === Math.round(s.lic * 100),
+          revenue_month: r2(buy(month(acts, rate, {...s, lic: pct / 100, ...(byShare ? {units: c} : {})}, byShare ? s.users : c, 1).before * (1 + buffer), rate, basis).revenue)}))),
       };
     }
     return out;
@@ -202,4 +213,4 @@ view('agent_now', 'engine', 'Selected agent today', `The selected agent at the s
 view('activity_credits', 'engine', 'Credits by activity', 'Monthly volume and credits of every prompt and scenario of the selected agent, before the buffer.', (engine) => (engine.detail ? engine.detail.rows : []));
 view('waterfall', 'engine', 'How the monthly credits build up', 'Quote, extra work, other scenarios and buffer credits of the selected agent.', (engine) => (engine.detail ? engine.detail.waterfall : []));
 view('meters', 'engine', 'Credits by billing meter', `The selected agent's monthly credits by what is billed, before the buffer.`, (engine) => (engine.detail ? engine.detail.meters : []));
-view('heat', 'engine', 'Revenue by users and licence share', 'Monthly revenue of the selected agent at other user counts and licence shares, everything else as set.', (engine) => (engine.detail ? engine.detail.heat : []));
+view('heat', 'engine', 'Revenue by volume and licence share', 'Monthly revenue of the selected agent at other user counts (or, for an agent whose work is a share of a business volume, other shares) and licence shares, everything else as set.', (engine) => (engine.detail ? engine.detail.heat : []));

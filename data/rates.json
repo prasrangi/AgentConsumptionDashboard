@@ -1,6 +1,7 @@
 {
  "source": [
-  "Copilot Credit Calculator - Proposal Agent.xlsx"
+  "Copilot Credit Calculator - Proposal Agent.xlsx",
+  "Copilot Credit Calculator - QEV Agent.xlsx"
  ],
  "rows": [
   {
@@ -46,6 +47,12 @@
    "section": "Standard agent"
   },
   {
+   "key": "ai_basic",
+   "rate": "AI tool, Basic model",
+   "value": 0.1,
+   "section": "Standard agent"
+  },
+  {
    "key": "ai_standard",
    "rate": "AI drafting, Standard model",
    "value": 1.5,
@@ -61,6 +68,12 @@
    "key": "flow_step",
    "rate": "Flow step",
    "value": 0.13,
+   "section": "Standard agent"
+  },
+  {
+   "key": "quality_run",
+   "rate": "Quality evaluation of a closed conversation",
+   "value": 7.5,
    "section": "Standard agent"
   },
   {

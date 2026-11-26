@@ -77,8 +77,21 @@ way to compare scenarios, not as a commitment.
 
 ## Viewing it
 
-With GitHub Pages on for this repository (Settings > Pages > Deploy from a branch), the page is at
-<https://prasrangi.github.io/AgentConsumptionDashboard/>.
+The page is live at <https://prasrangi.github.io/AgentConsumptionDashboard/>. Anyone with that link
+can open it, with no sign-in and no need to visit this repository.
+
+GitHub serves it from the `gh-pages` branch, which holds only the built `index.html`. After
+changing data or code on `main`, rebuild and refresh that branch:
+
+```
+python3 tools/build.py
+git checkout gh-pages
+git checkout main -- index.html
+git commit -am "Update the published page" && git push origin gh-pages
+git checkout main
+```
+
+The page updates about a minute after the push.
 
 ## Adding an agent
 

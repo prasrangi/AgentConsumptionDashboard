@@ -12,6 +12,69 @@ rebuilt from the "Copilot Credit Calculator" workbooks. One page, no server: ope
 The figures are a planning estimate. Volumes are illustrative until real ones replace them, and the
 rates are those recorded in the calculator workbook.
 
+## Assumptions at a glance
+
+These are the assumptions behind every figure on the page, in plain terms. They describe the
+Proposal Agent at its starting settings. The use, licence, build, purchase and growth assumptions can
+be changed with the sliders and dropdowns on the page. Prices and credit rates come from the
+calculator workbook and change only when the data is refreshed from it.
+
+### What we assumed about the agent's use
+
+| # | Assumption | Starting value |
+|---|---|---|
+| 1 | Number of sellers using the agent | 100 |
+| 2 | Quotes each seller prepares with the agent in a month | 10 (so 1,000 quotes a month) |
+| 3 | Questions each seller asks the agent besides quotes | 20 a month, plus one follow-up turn per quote |
+| 4 | Advisor drafts written in a month | 50, a set number that does not depend on sellers |
+| 5 | Tender work in a month | 1,500 pages read and 100 response drafts, set numbers |
+| 6 | Automatic runs started by an event or schedule | 50 a month, a set number |
+| 7 | Sellers who already hold a Microsoft Copilot licence | Half (50%) |
+| 8 | What a licence covers | Licensed sellers are not charged for the agent's conversations, but still pay for background automation (milestone notices, tender page reading, automatic runs). A cautious option charges them for tools and drafting too. |
+| 9 | How the agent is built | As a standard agent. The Copilot harness is an alternative build and uses far more credits (about 24 times as many at these settings). |
+| 10 | Drafting model | Standard. The Premium model costs more per draft. |
+
+### What we assumed about price
+
+| # | Assumption | Starting value |
+|---|---|---|
+| 11 | Revenue is the credit bill | What the credits used cost at list price. This is the "monthly cost" in the calculator workbook. |
+| 12 | Price of a credit, pay-as-you-go | $0.01 |
+| 13 | Capacity pack | 25,000 credits for $200 a month (equal to $0.008 a credit when fully used) |
+| 14 | How credits are bought | Pay-as-you-go to begin with. Packs, or packs plus pay-as-you-go for the remainder, can be chosen. Packs are bought once for all agents together. |
+| 15 | Safety buffer | 15% more credits than the activities add up to, as a safety margin |
+| 16 | Credits used by each step of work | The rates in the calculator workbook (for example 2 per reply, 5 per tool call, 10 per search). They are read from the workbook and not changed here. |
+
+### What we assumed about the forecast
+
+| # | Assumption | Starting value |
+|---|---|---|
+| 17 | User growth | 10% more users each year, taking effect at the start of the year: 100, 110, 121, 133 |
+| 18 | Usage grows with users | Everything grows with users, including drafts, tenders and automatic runs. Only background platform running costs stay flat. |
+| 19 | Everything else holds still for three years | Same price per credit, same credit rates, same habits per user. No price changes, discounts, inflation or users leaving. |
+| 20 | A year's revenue | Twelve months at that year's usage, with no gradual ramp inside the year |
+| 21 | Agents not built yet | Counted from the year they go live, as users times an estimated number of credits per user, plus the buffer |
+| 22 | All agents together | The totals add up every agent, so a new agent raises revenue and the forecast straight away |
+
+### What is not counted
+
+- Microsoft Copilot licences themselves
+- Dataverse storage, Power Automate licences and Azure costs
+- Taxes, enterprise discounts and currency effects (figures are in US dollars)
+
+### What the starting settings produce
+
+| | Users | Revenue a month | Revenue for the year |
+|---|---|---|---|
+| Today | 100 | $935 | $11,225 |
+| Year 1 | 110 | $1,028 | $12,332 |
+| Year 2 | 121 | $1,129 | $13,550 |
+| Year 3 | 133 | $1,240 | $14,878 |
+
+That is about $40,800 over the three years, 32.5% above today by Year 3. These are planning
+figures. The volumes above are illustrative until real usage replaces them, so treat the totals as a
+way to compare scenarios, not as a commitment.
+
 ## Viewing it
 
 With GitHub Pages on for this repository (Settings > Pages > Deploy from a branch), the page is at

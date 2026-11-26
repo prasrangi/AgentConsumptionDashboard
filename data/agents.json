@@ -1,0 +1,23 @@
+{
+ "source": [
+  "Copilot Credit Calculator - Proposal Agent.xlsx"
+ ],
+ "rows": [
+  {
+   "agent_id": "proposal",
+   "agent": "Proposal Agent",
+   "unit": "quote",
+   "users_label": "Sellers using the agent",
+   "units_label": "Quotes per seller per month",
+   "extra_label": "Advisor drafts per month",
+   "users": 100,
+   "units_per_user": 10,
+   "extra_per_month": 50,
+   "licence_pct": 50.0,
+   "model": "Standard",
+   "licence_rule": "Guide",
+   "build": "Standard",
+   "workbook": "Copilot Credit Calculator - Proposal Agent.xlsx"
+  }
+ ]
+}

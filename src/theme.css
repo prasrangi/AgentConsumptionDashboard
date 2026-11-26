@@ -1,0 +1,31 @@
+/* The look of the standalone page: the tokens the dashboard's styles expect, in light and dark. */
+:root {
+  color-scheme: light dark;
+  --color-fg: #191919; --color-fg-muted: #666666; --color-bg: #f9f9f9; --color-panel: #ffffff; --color-border-line: #e7e7e7;
+  --color-ok: #006c10; --color-warn: #8a5a00; --color-bad: #c0302f;
+  --font-anthropic-sans: system-ui, -apple-system, 'Segoe UI', sans-serif; --font-anthropic-serif: var(--font-anthropic-sans);
+  --cds-font-size-caption: 12px; --cds-font-size-body: 14px; --cds-font-size-heading: 17px; --cds-font-size-title: 28px; --cds-font-weight-medium: 600;
+  --cds-gap-xs: 4px; --cds-gap-sm: 8px; --cds-gap-md: 12px; --cds-gap-lg: 20px; --cds-gap-xl: 32px;
+  --cds-pad-xs: 4px; --cds-pad-sm: 8px; --cds-pad-md: 12px; --cds-pad-lg: 18px; --cds-pad-xl: 24px; --cds-radius: 12px;
+  --cds-chart-muted: #c2c2c2; --cds-chart-grid: #e7e7e7; --cds-chart-axis: #c2c2c2; --cds-chart-reference: #c2c2c2; --cds-text-secondary: #666666;
+  --cds-surface-popover: #ffffff; --cds-border: rgba(11, 11, 11, 0.14); --cds-shadow-popover: 0 6px 20px rgba(0, 0, 0, 0.14);
+  --series-1: #257de0; --series-2: #f47230; --series-3: #00b894; --series-4: #f2a600; --series-5: #ee7fac; --series-6: #008a17; --series-7: #6a4ce2; --series-8: #ec4647;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-fg: #efefef; --color-fg-muted: #9c9c9c; --color-bg: #0b0b0b; --color-panel: #191919; --color-border-line: #303030;
+    --color-ok: #53c556; --color-warn: #fbb315; --color-bad: #eb6263;
+    --cds-chart-muted: #474747; --cds-chart-grid: #303030; --cds-chart-axis: #474747; --cds-chart-reference: #474747; --cds-text-secondary: #9c9c9c;
+    --cds-surface-popover: #232323; --cds-border: rgba(255, 255, 255, 0.14); --cds-shadow-popover: 0 6px 20px rgba(0, 0, 0, 0.5);
+    --series-1: #338ced; --series-2: #e76624; --series-3: #00a888; --series-4: #d28e05; --series-5: #e24d8b; --series-6: #0aac23; --series-7: #9887ef; --series-8: #eb6263;
+  }
+}
+html, body { margin: 0; background: var(--color-bg); }
+#dash-root { max-width: 1440px; margin: 0 auto; padding: 28px 24px 56px; }
+.dash-skeleton { color: transparent; background: var(--color-border-line); border-radius: 6px; }
+.dash-select { font: inherit; padding: 6px 8px; color: var(--color-fg); background-color: var(--color-bg); border: 1px solid var(--color-border-line); border-radius: 6px; }
+.cc-title, .cc-big { font-weight: 650; letter-spacing: -0.01em; }
+.cc-caveat { margin-top: 8px; max-width: 78ch; }
+.cc-foot { margin: 0; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+.cc-foot a { color: inherit; }
+@media (max-width: 600px) { #dash-root { padding: 16px 12px 40px; } }

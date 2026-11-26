@@ -1,0 +1,264 @@
+<div class='cc'>
+<div class='cc-head'>
+<p class='cc-eyebrow'>Copilot Credits, agent portfolio</p>
+<h1 class='cc-title' id='title'>Copilot Credit revenue across agents</h1>
+<p class='cc-lede' id='takeaway'>Today the portfolio earns <b data-draw='v' data-source='portfolio' data-field='revenue_month' data-row='0' data-fmt='usd'>—</b> a month in Copilot Credits from <b data-draw='v' data-source='portfolio' data-field='users' data-row='0' data-fmt='int'>—</b> users. With <b data-draw='v' data-source='portfolio' data-field='growth_pct' data-row='0' data-fmt='pct'>—</b> more users each year that is <b data-draw='v' data-source='portfolio' data-field='year1' data-row='0' data-fmt='usd'>—</b> in Year 1, <b data-draw='v' data-source='portfolio' data-field='year2' data-row='0' data-fmt='usd'>—</b> in Year 2 and <b data-draw='v' data-source='portfolio' data-field='year3' data-row='0' data-fmt='usd'>—</b> in Year 3, or <b data-draw='v' data-source='portfolio' data-field='three_year' data-row='0' data-fmt='usd'>—</b> over the three years.</p>
+<p class='cc-note cc-caveat'>A planning estimate: volumes are illustrative and rates are those recorded in the calculator workbook. Move the sliders to test your own numbers; the link in the address bar keeps your settings.</p>
+</div>
+<div class='cc-layout'>
+<div class='cc-rail' id='controls'>
+<div class='cc-card cc-group' id='controls-portfolio'>
+<h2 class='cc-h3'>Portfolio settings</h2>
+<div class='cc-ctl'>
+<span class='cc-ctl-name' id='l-basis'>Revenue counted at</span>
+<select class='dash-select' data-p='basis' aria-labelledby='l-basis'>
+<option value='payg'>Pay-as-you-go</option>
+<option value='packs'>Packs only</option>
+<option value='hybrid'>Packs plus pay-as-you-go</option>
+<option value='lowest'>Lowest of the three</option>
+</select>
+</div>
+<div class='cc-ctl'>
+<span class='cc-ctl-name' id='l-growth'>User growth each year</span>
+<span class='cc-ctl-row'><input class='cc-range' type='range' min='0' max='50' step='1' value='10' data-p='growth' aria-labelledby='l-growth'><span class='cc-unit'><input class='cc-num' type='number' min='0' max='300' step='1' value='10' data-p='growth' aria-labelledby='l-growth'></span></span>
+</div>
+<div class='cc-ctl'>
+<span class='cc-ctl-name' id='l-buffer'>Safety buffer on credits</span>
+<span class='cc-ctl-row'><input class='cc-range' type='range' min='0' max='30' step='1' value='15' data-p='buffer' aria-labelledby='l-buffer'><span class='cc-unit'><input class='cc-num' type='number' min='0' max='100' step='1' value='15' data-p='buffer' aria-labelledby='l-buffer'></span></span>
+</div>
+</div>
+<div class='cc-card cc-group' id='controls-agent'>
+<h2 class='cc-h3'>Agent inputs</h2>
+<div class='cc-ctl'>
+<span class='cc-ctl-name' id='l-agent'>Agent</span>
+<select class='dash-select' data-draw='agent-pick' data-source='agents' aria-labelledby='l-agent'></select>
+</div>
+<div class='cc-ctl'>
+<span class='cc-ctl-name' id='l-build'>Built on</span>
+<select class='dash-select' data-p='build' data-scope='agent' aria-labelledby='l-build'>
+<option value='standard'>Standard agent</option>
+<option value='harness'>Copilot harness agent</option>
+</select>
+</div>
+<div class='cc-ctl'>
+<span class='cc-ctl-name' id='l-users' data-draw='v' data-source='agent_now' data-field='users_label' data-row='0'>—</span>
+<span class='cc-ctl-row'><input class='cc-range' type='range' min='0' max='5000' step='10' data-p='users' data-scope='agent' aria-labelledby='l-users'><input class='cc-num' type='number' min='0' max='1000000' step='1' data-p='users' data-scope='agent' aria-labelledby='l-users'></span>
+</div>
+<div class='cc-ctl'>
+<span class='cc-ctl-name' id='l-units' data-draw='v' data-source='agent_now' data-field='units_label' data-row='0'>—</span>
+<span class='cc-ctl-row'><input class='cc-range' type='range' min='0' max='60' step='1' data-p='units' data-scope='agent' aria-labelledby='l-units'><input class='cc-num' type='number' min='0' max='1000' step='1' data-p='units' data-scope='agent' aria-labelledby='l-units'></span>
+</div>
+<div class='cc-ctl' id='ctl-extra'>
+<span class='cc-ctl-name' id='l-extra' data-draw='v' data-source='agent_now' data-field='extra_label' data-row='0'>—</span>
+<span class='cc-ctl-row'><input class='cc-range' type='range' min='0' max='1000' step='5' data-p='extra' data-scope='agent' aria-labelledby='l-extra'><input class='cc-num' type='number' min='0' max='100000' step='1' data-p='extra' data-scope='agent' aria-labelledby='l-extra'></span>
+</div>
+<div class='cc-ctl'>
+<span class='cc-ctl-name' id='l-lic'>Users with a Microsoft Copilot licence</span>
+<span class='cc-ctl-row'><input class='cc-range' type='range' min='0' max='100' step='1' data-p='lic' data-scope='agent' data-std aria-labelledby='l-lic'><span class='cc-unit'><input class='cc-num' type='number' min='0' max='100' step='1' data-p='lic' data-scope='agent' data-std aria-labelledby='l-lic'></span></span>
+</div>
+<div class='cc-ctl'>
+<span class='cc-ctl-name' id='l-rule'>Licensed users</span>
+<select class='dash-select' data-p='rule' data-scope='agent' data-std aria-labelledby='l-rule'>
+<option value='guide'>Covered by their licence</option>
+<option value='conservative'>Conservative: still pay for tools and drafting</option>
+</select>
+</div>
+<div class='cc-ctl'>
+<span class='cc-ctl-name' id='l-model'>AI model for drafting</span>
+<select class='dash-select' data-p='model' data-scope='agent' data-std aria-labelledby='l-model'>
+<option value='Standard'>Standard</option>
+<option value='Premium'>Premium</option>
+</select>
+</div>
+<div class='cc-ctl'>
+<span class='cc-ctl-name' id='l-other'>Other scenarios</span>
+<select class='dash-select' data-p='other' data-scope='agent' aria-labelledby='l-other'>
+<option value='in'>Included</option>
+<option value='out'>Left out</option>
+</select>
+</div>
+<p class='cc-note' id='hint-harness' hidden>On the Copilot harness a licence and the drafting model make no difference, so those three are switched off.</p>
+<button class='cc-btn' type='button' id='reset'>Reset to the workbook's numbers</button>
+</div>
+</div>
+<div class='cc-main'>
+<section class='cc-sec' id='outlook'>
+<h2 class='cc-h2'>Revenue today and over the next three years</h2>
+<div class='cc-periods'>
+<div class='cc-card cc-period' id='period-today' style='--cc-step: 25%'>
+<p class='cc-k'>Today, over a year</p>
+<p class='cc-big'><span class='dash-skeleton' data-draw='v' data-source='forecast' data-field='revenue_year' data-where='n=0' data-fmt='usd'>—</span></p>
+<p class='cc-sub'><span data-draw='v' data-source='forecast' data-field='users' data-where='n=0' data-fmt='int'>—</span> users, <span data-draw='v' data-source='forecast' data-field='revenue_month' data-where='n=0' data-fmt='usd0'>—</span> a month</p>
+<p class='cc-sub'>Run rate before growth</p>
+</div>
+<div class='cc-card cc-period' id='period-year1' style='--cc-step: 50%'>
+<p class='cc-k'>Year 1</p>
+<p class='cc-big'><span class='dash-skeleton' data-draw='v' data-source='forecast' data-field='revenue_year' data-where='n=1' data-fmt='usd'>—</span></p>
+<p class='cc-sub'><span data-draw='v' data-source='forecast' data-field='users' data-where='n=1' data-fmt='int'>—</span> users, <span data-draw='v' data-source='forecast' data-field='revenue_month' data-where='n=1' data-fmt='usd0'>—</span> a month</p>
+<p class='cc-sub'><span class='cc-delta' data-draw='v' data-source='forecast' data-field='change_pct' data-where='n=1' data-fmt='delta'>—</span> against today</p>
+</div>
+<div class='cc-card cc-period' id='period-year2' style='--cc-step: 75%'>
+<p class='cc-k'>Year 2</p>
+<p class='cc-big'><span class='dash-skeleton' data-draw='v' data-source='forecast' data-field='revenue_year' data-where='n=2' data-fmt='usd'>—</span></p>
+<p class='cc-sub'><span data-draw='v' data-source='forecast' data-field='users' data-where='n=2' data-fmt='int'>—</span> users, <span data-draw='v' data-source='forecast' data-field='revenue_month' data-where='n=2' data-fmt='usd0'>—</span> a month</p>
+<p class='cc-sub'><span class='cc-delta' data-draw='v' data-source='forecast' data-field='change_pct' data-where='n=2' data-fmt='delta'>—</span> against today</p>
+</div>
+<div class='cc-card cc-period' id='period-year3' style='--cc-step: 100%'>
+<p class='cc-k'>Year 3</p>
+<p class='cc-big'><span class='dash-skeleton' data-draw='v' data-source='forecast' data-field='revenue_year' data-where='n=3' data-fmt='usd'>—</span></p>
+<p class='cc-sub'><span data-draw='v' data-source='forecast' data-field='users' data-where='n=3' data-fmt='int'>—</span> users, <span data-draw='v' data-source='forecast' data-field='revenue_month' data-where='n=3' data-fmt='usd0'>—</span> a month</p>
+<p class='cc-sub'><span class='cc-delta' data-draw='v' data-source='forecast' data-field='change_pct' data-where='n=3' data-fmt='delta'>—</span> against today</p>
+</div>
+</div>
+<div class='cc-card cc-stats' id='portfolio-stats'>
+<div class='cc-stat' id='stat-three-year'><span class='cc-k'>Three-year revenue</span><span class='cc-stat-v' data-draw='v' data-source='portfolio' data-field='three_year' data-row='0' data-fmt='usd'>—</span><span class='cc-sub'>Year 1 to Year 3</span></div>
+<div class='cc-stat' id='stat-credits'><span class='cc-k'>Credits a month</span><span class='cc-stat-v' data-draw='v' data-source='portfolio' data-field='credits_month' data-row='0' data-fmt='num'>—</span><span class='cc-sub'><span data-draw='v' data-source='portfolio' data-field='packs_needed' data-row='0' data-fmt='int'>—</span> capacity packs would cover it</span></div>
+<div class='cc-stat' id='stat-users'><span class='cc-k'>Users today</span><span class='cc-stat-v' data-draw='v' data-source='portfolio' data-field='users' data-row='0' data-fmt='int'>—</span><span class='cc-sub'>Agents live: <span data-draw='v' data-source='portfolio' data-field='agents' data-row='0' data-fmt='int'>—</span></span></div>
+<div class='cc-stat' id='stat-per-user'><span class='cc-k'>Revenue per user</span><span class='cc-stat-v' data-draw='v' data-source='portfolio' data-field='revenue_per_user' data-row='0' data-fmt='usd2'>—</span><span class='cc-sub'>a month</span></div>
+<div class='cc-stat' id='stat-cheapest'><span class='cc-k'>Cheapest way to buy</span><span class='cc-stat-v' data-draw='v' data-source='portfolio' data-field='cheapest' data-row='0'>—</span><span class='cc-sub'>for this month's credits</span></div>
+</div>
+<div class='cc-two'>
+<div class='cc-card' id='card-forecast'>
+<h3 class='cc-h3'>Annual revenue by agent</h3>
+<p class='cc-note'>Twelve months at each year's user count. The lighter column is today's rate held for a year.</p>
+<div class='cc-chart dash-skeleton' id='chart-forecast' style='--cc-h: 260px' data-draw='chart-forecast' data-source='forecast_agents forecast' aria-label='Columns of annual revenue, stacked by agent, for today and each of the next three years'></div>
+</div>
+<div class='cc-card' id='card-runway'>
+<h3 class='cc-h3'>Revenue adding up, month by month</h3>
+<p class='cc-note'>Running total from the first month of Year 1 to the end of Year 3.</p>
+<div class='cc-chart dash-skeleton' id='chart-runway' style='--cc-h: 260px' data-draw='chart-runway' data-source='runway' aria-label='Line of cumulative revenue over the 36 months of the forecast'></div>
+</div>
+</div>
+<div class='cc-card' id='card-forecast-table'>
+<h3 class='cc-h3'>The forecast in numbers</h3>
+<div class='cc-scroll'>
+<table class='cc-table' id='table-forecast' data-source='forecast' data-row-key='period'>
+<thead><tr>
+<th data-field='period'>Period</th>
+<th class='cc-r' data-field='users' data-fmt='int'>Users</th>
+<th class='cc-r' data-field='agents' data-fmt='int'>Agents live</th>
+<th class='cc-r' data-field='credits_month' data-fmt='num'>Credits a month</th>
+<th class='cc-r' data-field='revenue_month' data-fmt='usd0'>Revenue a month</th>
+<th class='cc-r' data-field='revenue_year' data-fmt='usd0'>Revenue a year</th>
+<th class='cc-r' data-field='change_pct' data-fmt='delta'>Against today</th>
+<th class='cc-r' data-field='cumulative' data-fmt='usd0'>Running total</th>
+</tr></thead>
+<tbody data-draw='rows'></tbody>
+</table>
+</div>
+</div>
+</section>
+<section class='cc-sec' id='agents'>
+<h2 class='cc-h2'>Agents in the portfolio</h2>
+<div class='cc-card' id='card-agents'>
+<div class='cc-scroll'>
+<table class='cc-table' id='table-agents' data-source='agent_totals' data-row-key='agent_id'>
+<thead><tr>
+<th data-field='agent'>Agent</th>
+<th data-field='live'>Status</th>
+<th data-field='build'>Built on</th>
+<th class='cc-r' data-field='users' data-fmt='int'>Users</th>
+<th class='cc-r' data-field='credits_month' data-fmt='num'>Credits a month</th>
+<th class='cc-r' data-field='revenue_month' data-fmt='usd0'>Revenue a month</th>
+<th data-field='share_pct' data-fmt='share'>Share of credits</th>
+<th class='cc-r' data-field='revenue_per_user' data-fmt='usd2'>Per user a month</th>
+<th class='cc-r' data-field='year3' data-fmt='usd0'>Revenue in Year 3</th>
+</tr></thead>
+<tbody data-draw='rows'></tbody>
+</table>
+</div>
+</div>
+<div class='cc-two'>
+<div class='cc-card cc-group' id='card-planned'>
+<h3 class='cc-h3'>Add an agent that has no calculator yet</h3>
+<p class='cc-note'>Give it a name, its users, a first estimate of credits per user a month and when it goes live. It joins every total and the forecast, with the same buffer and growth, and is kept in this browser only. For scale, the <span data-draw='v' data-source='agent_now' data-field='agent' data-row='0'>—</span> uses <span data-draw='v' data-source='agent_now' data-field='credits_per_user' data-row='0' data-fmt='num'>—</span> credits per user a month before the buffer.</p>
+<form class='cc-form' id='add-agent'>
+<label class='cc-ctl'><span class='cc-ctl-name'>Agent name</span><input class='cc-text' name='agent_name' required maxlength='60' autocomplete='off'></label>
+<label class='cc-ctl'><span class='cc-ctl-name'>Users</span><input class='cc-num' name='users' type='number' min='0' step='1' required></label>
+<label class='cc-ctl'><span class='cc-ctl-name'>Credits per user</span><input class='cc-num' name='credits' type='number' min='0' step='any' required></label>
+<label class='cc-ctl'><span class='cc-ctl-name'>Goes live</span><select class='dash-select' name='starts'><option value='0'>Today</option><option value='1'>Year 1</option><option value='2'>Year 2</option><option value='3'>Year 3</option></select></label>
+<button class='cc-btn cc-btn-main' type='submit'>Add agent</button>
+</form>
+<p class='cc-warn cc-unsaved' hidden>Kept for this visit only: this browser is not letting the page store data.</p>
+<p class='cc-note' id='planned-empty'>No planned agents yet. The first one you add appears here, in the table above and in the forecast.</p>
+<ul class='cc-list' id='planned-list' data-draw='planned-list' data-source='planned'></ul>
+</div>
+<div class='cc-card' id='card-purchase'>
+<h3 class='cc-h3'>Three ways to buy this month's credits</h3>
+<p class='cc-note'>Packs are bought for the whole portfolio. The coloured bar is the option counted as revenue on this page.</p>
+<div class='cc-chart dash-skeleton' id='chart-purchase' style='--cc-h: 96px' data-draw='chart-purchase' data-source='purchase' aria-label='Bars of the monthly cost at pay-as-you-go, with packs only, and with packs plus pay-as-you-go'></div>
+</div>
+</div>
+</section>
+<section class='cc-sec' id='deep-dive'>
+<h2 class='cc-h2'><span data-draw='v' data-source='agent_now' data-field='agent' data-row='0'>—</span> in detail</h2>
+<p class='cc-note'>Built on the <span data-draw='v' data-source='agent_now' data-field='build' data-row='0'>—</span>, at the agent inputs set in the controls. Pick another agent there to see its detail.</p>
+<div class='cc-card cc-stats' id='agent-stats'>
+<div class='cc-stat' id='stat-units'><span class='cc-k'><span data-draw='v' data-source='agent_now' data-field='unit' data-row='0'>—</span>s a month</span><span class='cc-stat-v' data-draw='v' data-source='agent_now' data-field='units_month' data-row='0' data-fmt='int'>—</span></div>
+<div class='cc-stat' id='stat-unit-credits'><span class='cc-k'>Credits per <span data-draw='v' data-source='agent_now' data-field='unit' data-row='0'>—</span></span><span class='cc-stat-v' data-draw='v' data-source='agent_now' data-field='credits_per_unit' data-row='0' data-fmt='dec'>—</span><span class='cc-sub'>user without a licence</span></div>
+<div class='cc-stat' id='stat-unit-licensed'><span class='cc-k'>Credits per <span data-draw='v' data-source='agent_now' data-field='unit' data-row='0'>—</span></span><span class='cc-stat-v' data-draw='v' data-source='agent_now' data-field='credits_per_unit_licensed' data-row='0' data-fmt='dec'>—</span><span class='cc-sub'>licensed user</span></div>
+<div class='cc-stat' id='stat-unit-cost'><span class='cc-k'>Cost per <span data-draw='v' data-source='agent_now' data-field='unit' data-row='0'>—</span></span><span class='cc-stat-v' data-draw='v' data-source='agent_now' data-field='cost_per_unit' data-row='0' data-fmt='usd2'>—</span><span class='cc-sub'>pay-as-you-go, with buffer</span></div>
+<div class='cc-stat' id='stat-agent-credits'><span class='cc-k'>Credits a month</span><span class='cc-stat-v' data-draw='v' data-source='agent_now' data-field='credits_month' data-row='0' data-fmt='num'>—</span><span class='cc-sub'>the number to plan capacity on</span></div>
+<div class='cc-stat' id='stat-agent-lowest'><span class='cc-k'>Lowest monthly cost</span><span class='cc-stat-v' data-draw='v' data-source='agent_now' data-field='lowest' data-row='0' data-fmt='usd0'>—</span><span class='cc-sub' data-draw='v' data-source='agent_now' data-field='cheapest' data-row='0'>—</span></div>
+</div>
+<div class='cc-two'>
+<div class='cc-card' id='card-waterfall'>
+<h3 class='cc-h3'>How a month of credits builds up</h3>
+<p class='cc-note'>Each bar starts where the one before it ends.</p>
+<div class='cc-chart dash-skeleton' id='chart-waterfall' style='--cc-h: 120px' data-draw='chart-waterfall' data-source='waterfall' aria-label='Running build-up of monthly credits from quotes, extra work, other scenarios and the safety buffer to the total'></div>
+</div>
+<div class='cc-card' id='card-meters'>
+<h3 class='cc-h3'>What is being billed</h3>
+<p class='cc-note'>Credits a month by billing meter, before the buffer.</p>
+<div class='cc-chart dash-skeleton' id='chart-meters' style='--cc-h: 120px' data-draw='chart-meters' data-source='meters' aria-label='Bars of monthly credits by billing meter'></div>
+</div>
+<div class='cc-card cc-wide' id='card-activities'>
+<h3 class='cc-h3'>Where the credits go, activity by activity</h3>
+<p class='cc-note'>Credits a month for every prompt and scenario that uses any, largest first, before the buffer.</p>
+<div class='cc-chart dash-skeleton' id='chart-activities' style='--cc-h: 240px' data-draw='chart-activities' data-source='activity_credits waterfall' aria-label='Bars of monthly credits by activity, largest first'></div>
+</div>
+<div class='cc-card' id='card-builds'>
+<h3 class='cc-h3'>Standard agent against Copilot harness</h3>
+<p class='cc-note'>The same agent and settings built either way, as revenue a month. The harness build uses <b data-draw='v' data-source='agent_now' data-field='harness_ratio' data-row='0' data-fmt='dec'>—</b> times the credits.</p>
+<div class='cc-chart dash-skeleton' id='chart-builds' style='--cc-h: 64px' data-draw='chart-builds' data-source='builds' aria-label='Bars of monthly revenue for the standard agent and the Copilot harness agent'></div>
+</div>
+<div class='cc-card' id='card-heat'>
+<h3 class='cc-h3'>Revenue a month at other user counts and licence shares</h3>
+<p class='cc-note'>Columns are users, rows the share of them holding a Microsoft Copilot licence. The outlined cell is the current setting; everything else stays as set.</p>
+<div class='cc-chart dash-skeleton' id='chart-heat' style='--cc-h: 200px' data-draw='chart-heat' data-source='heat' aria-label='Grid of monthly revenue by number of users and share of licensed users'></div>
+</div>
+</div>
+<details class='cc-card cc-details' id='activity-table'>
+<summary>Every activity as a table</summary>
+<div class='cc-scroll'>
+<table class='cc-table' id='table-activities' data-source='activity_credits' data-row-key='activity'>
+<thead><tr>
+<th data-field='activity'>Activity</th>
+<th data-field='group'>Part</th>
+<th data-field='follows'>Volume driven by</th>
+<th class='cc-r' data-field='volume_month' data-fmt='dec'>Volume a month</th>
+<th class='cc-r' data-field='credits_each' data-fmt='dec'>Credits each, on average</th>
+<th class='cc-r' data-field='credits_month' data-fmt='dec'>Credits a month</th>
+<th data-field='share_pct' data-fmt='share'>Share</th>
+</tr></thead>
+<tbody data-draw='rows'></tbody>
+</table>
+</div>
+</details>
+</section>
+<details class='cc-card cc-details' id='method'>
+<summary>How the numbers are worked out, and what is assumed</summary>
+<ul class='cc-defs'>
+<li><b>Revenue</b> is the Copilot Credits the agents use, priced on the purchase option chosen. It is the figure the calculator workbook calls monthly cost. Pay-as-you-go is <span data-draw='v' data-source='rates' data-field='value' data-where='key=price_per_credit' data-fmt='usd2'>—</span> a credit; a capacity pack is <span data-draw='v' data-source='rates' data-field='value' data-where='key=pack_credits' data-fmt='int'>—</span> credits for <span data-draw='v' data-source='rates' data-field='value' data-where='key=pack_price' data-fmt='usd0'>—</span> a month.</li>
+<li><b>Credits</b> follow the workbook line for line: each activity's monthly volume times its credits, blended by the share of licensed users, plus the safety buffer. At the workbook's own inputs the page shows the workbook's Monthly Estimate.</li>
+<li><b>When users change</b>, the volumes the workbook ties to users move with them: units of work per user, knowledge questions per user and follow-up turns per unit of work. Volumes set on their own, such as Advisor drafts, tenders and autonomous runs, stay where they are set. The table of activities shows which is which.</li>
+<li><b>In the forecast</b> users grow by the chosen rate at the start of each year, and all usage grows with them, including the volumes set on their own. Platform overhead (polling flows, harness build sessions and test runs) stays flat. A year's revenue is twelve months at that year's volume.</li>
+<li><b>Packs</b> are bought for the whole portfolio, so with a pack option each agent's revenue is its share of the portfolio's bill by credits.</li>
+<li><b>Planned agents</b> count from the year they go live, as users times the credits per user you entered, plus the buffer.</li>
+<li><b>Volumes are illustrative</b> until real figures replace them: the workbook marks sellers, quotes, Advisor drafts, licence share and the other-scenario volumes that way.</li>
+<li><b>Not counted</b>, as in the workbook: Dataverse storage, Power Automate licences, Azure costs and the Microsoft Copilot licences themselves.</li>
+</ul>
+</details>
+</div>
+</div>
+</div>

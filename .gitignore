@@ -1,0 +1,7 @@
+# Calculator workbooks stay out of the repo: they can hold customer detail.
+*.xlsx
+*.xlsm
+~$*
+__pycache__/
+.DS_Store
+node_modules/

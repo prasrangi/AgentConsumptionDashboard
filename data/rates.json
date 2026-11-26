@@ -1,0 +1,103 @@
+{
+ "source": [
+  "Copilot Credit Calculator - Proposal Agent.xlsx"
+ ],
+ "rows": [
+  {
+   "key": "price_per_credit",
+   "rate": "Price per Copilot Credit",
+   "value": 0.01,
+   "section": "Buying"
+  },
+  {
+   "key": "pack_price",
+   "rate": "Capacity pack price",
+   "value": 200,
+   "section": "Buying"
+  },
+  {
+   "key": "pack_credits",
+   "rate": "Credits in one capacity pack",
+   "value": 25000,
+   "section": "Buying"
+  },
+  {
+   "key": "buffer",
+   "rate": "Safety buffer",
+   "value": 0.15,
+   "section": "Buying"
+  },
+  {
+   "key": "reply",
+   "rate": "Reply",
+   "value": 2,
+   "section": "Standard agent"
+  },
+  {
+   "key": "tool_call",
+   "rate": "Tool call",
+   "value": 5,
+   "section": "Standard agent"
+  },
+  {
+   "key": "graph_search",
+   "rate": "Graph search",
+   "value": 10,
+   "section": "Standard agent"
+  },
+  {
+   "key": "ai_standard",
+   "rate": "AI drafting, Standard model",
+   "value": 1.5,
+   "section": "Standard agent"
+  },
+  {
+   "key": "ai_premium",
+   "rate": "AI drafting, Premium model",
+   "value": 10,
+   "section": "Standard agent"
+  },
+  {
+   "key": "flow_step",
+   "rate": "Flow step",
+   "value": 0.13,
+   "section": "Standard agent"
+  },
+  {
+   "key": "light",
+   "rate": "Light task",
+   "value": 200,
+   "section": "Copilot harness"
+  },
+  {
+   "key": "medium",
+   "rate": "Medium task",
+   "value": 400,
+   "section": "Copilot harness"
+  },
+  {
+   "key": "heavy",
+   "rate": "Heavy task",
+   "value": 500,
+   "section": "Copilot harness"
+  },
+  {
+   "key": "harness_flow_step",
+   "rate": "Flow step on the harness",
+   "value": 0.13,
+   "section": "Copilot harness"
+  },
+  {
+   "key": "page_read",
+   "rate": "Content processing per page",
+   "value": 8,
+   "section": "More rates"
+  },
+  {
+   "key": "build_session",
+   "rate": "Harness build session (natural language)",
+   "value": 40,
+   "section": "More rates"
+  }
+ ]
+}

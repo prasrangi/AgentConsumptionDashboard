@@ -27,7 +27,7 @@ def whole(x):
 def main():
     data = {name: rows(name) for name in ("agents", "activities", "rates")}
     rate = {r["key"]: r["value"] for r in data["rates"]}
-    params = {"agent": data["agents"][0]["agent_id"], "basis": "payg", "buffer": whole(round(rate["buffer"] * 100, 4)), "growth": 10}
+    params = {"agent": data["agents"][0]["agent_id"], "basis": "payg", "buffer": whole(round(rate["buffer"] * 100, 4)), "growth": 10, "off": ""}
     for a in data["agents"]:
         key = a["agent_id"] + "_"
         params.update({

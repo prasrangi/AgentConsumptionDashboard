@@ -5,7 +5,7 @@
 <p class='cc-eyebrow'><span class='cc-pulse' aria-hidden='true'></span>Copilot Credits · Agent portfolio</p>
 <h1 class='cc-title' id='title'>Copilot Credit revenue across agents</h1>
 <ul class='cc-chips' aria-label='Current settings'>
-<li><span>Agents live</span><b data-draw='v' data-source='portfolio' data-field='agents' data-row='0' data-fmt='int'>—</b></li>
+<li><span>Agents selected</span><b><span data-draw='v' data-source='portfolio' data-field='selected' data-row='0' data-fmt='int'>—</span> of <span data-draw='v' data-source='portfolio' data-field='total_agents' data-row='0' data-fmt='int'>—</span></b></li>
 <li><span>Users today</span><b data-draw='v' data-source='portfolio' data-field='users' data-row='0' data-fmt='int'>—</b></li>
 <li><span>User growth a year</span><b data-draw='v' data-source='portfolio' data-field='growth_pct' data-row='0' data-fmt='pct'>—</b></li>
 <li><span>Priced at</span><b data-draw='v' data-source='portfolio' data-field='basis' data-row='0'>—</b></li>
@@ -21,6 +21,13 @@
 <div class='cc-hero-builds dash-skeleton' id='builds' data-draw='hero-builds' data-source='build_compare agents' role='group' aria-label='Monthly revenue of the whole portfolio as standard agents and on the Copilot harness'></div>
 <p class='cc-hero-foot'>Planning estimate: illustrative volumes at the calculator workbook's rates. Your settings are saved in the link.</p>
 </header>
+<section class='cc-sec cc-pick' id='agent-select' aria-labelledby='pick-title'>
+<div class='cc-pick-head'>
+<h2 class='cc-h2' id='pick-title'>Agents</h2>
+<p class='cc-note'>Tick the agents to include. Every total, the forecast and the build comparison follow the ticks.</p>
+</div>
+<div class='cc-pick-body dash-skeleton' data-draw='agent-cards' data-source='agent_cards portfolio' role='group' aria-labelledby='pick-title'></div>
+</section>
 <div class='cc-layout'>
 <div class='cc-rail' id='controls'>
 <div class='cc-card cc-group' id='controls-portfolio'>

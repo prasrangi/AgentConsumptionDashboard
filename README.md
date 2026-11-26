@@ -54,7 +54,7 @@ calculator workbook and change only when the data is refreshed from it.
 | 19 | Everything else holds still for three years | Same price per credit, same credit rates, same habits per user. No price changes, discounts, inflation or users leaving. |
 | 20 | A year's revenue | Twelve months at that year's usage, with no gradual ramp inside the year |
 | 21 | Agents not built yet | Counted from the year they go live, as users times an estimated number of credits per user, plus the buffer |
-| 22 | All agents together | The totals add up every agent, so a new agent raises revenue and the forecast straight away |
+| 22 | Which agents count | Every agent ticked in the Agents section counts towards the totals, the forecast and the build comparison. New agents start ticked, and unticking one takes it out of every figure. |
 
 ### What is not counted
 
@@ -109,6 +109,7 @@ sliders and its defaults from the data, and adds it to every total and to the fo
 agent a display name and unit of work in `AGENT_NAMES`, and say how its other-scenario volumes move
 with users in `SCALING`, both at the top of `tools/extract_calculator.py`.
 
+Each agent appears as a card in the Agents section, with a tick box to include it and the parts it covers.
 An agent with no workbook yet can be added on the page itself (name, users, credits per user, year
 it goes live). Those are kept in the browser that added them, not in this repository.
 

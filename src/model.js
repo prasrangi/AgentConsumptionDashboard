@@ -74,14 +74,19 @@ dash.calc('engine', {
     const buffer = Math.max(0, num(P.buffer, rate.buffer * 100)) / 100, growth = Math.max(0, num(P.growth, 10)) / 100;
     const basis = BASES[P.basis] ? P.basis : 'payg';
     const chosen = agents.find((a) => a.agent_id === P.agent) || agents[0];
-    const out = {rate, buffer, growth, basis, agents: [], detail: null};
+    const off = new Set(String(P.off || '').split(',').filter(Boolean));
+    const out = {rate, buffer, growth, basis, off, agents: [], detail: null};
     for (const a of agents) {
       const acts = activities.filter((x) => x.agent_id === a.agent_id);
       const s = {...settings(a, P), unitName: a.unit};
       const users = PERIODS.map((p, n) => usersIn(s.users, growth, n));
       const grow = users.map((u, n) => (s.users ? u / s.users : (1 + growth) ** n));
       const alt = Object.fromEntries(Object.keys(BUILDS).map((build) => [build, users.map((u, n) => month(acts, rate, {...s, build}, u, grow[n]).before * (1 + buffer))]));
-      out.agents.push({agent_id: a.agent_id, agent: a.agent, kind: 'Modelled', build: BUILDS[s.build], s_build: s.build, starts: 0, users, credits: alt[s.build], alt});
+      const now = month(acts, rate, s, s.users, 1), partName = a.unit[0].toUpperCase() + a.unit.slice(1) + 's';
+      const parts = [[partName, now.groups.Quote], [String(a.extra_label || 'Extra work').replace(/ per month$/i, ''), now.groups.Advisor], ['Other scenarios', now.groups.Other]]
+        .filter(([, v]) => v > 0).map(([part, v]) => ({part, pct: now.before ? r2(100 * v / now.before) : 0}));
+      out.agents.push({agent_id: a.agent_id, agent: a.agent, kind: 'Modelled', build: BUILDS[s.build], s_build: s.build, starts: 0, users, credits: alt[s.build], alt,
+        on: !off.has(a.agent_id), users_label: a.users_label, parts, covers: [...new Set(acts.filter((x) => num(x.volume) > 0).map((x) => x.activity))].length});
       if (a !== chosen) continue;
       const m = month(acts, rate, s, s.users, 1), total = m.before * (1 + buffer), b = buy(total, rate, basis);
       const extraName = String(a.extra_label || 'Extra work').replace(/ per month$/i, ''), unitsName = a.unit[0].toUpperCase() + a.unit.slice(1) + 's';
@@ -117,13 +122,16 @@ dash.calc('book', {
   description: 'Adds every agent together, planned ones from the year they go live, prices the credits on the purchase option chosen, and repeats that with users growing by the chosen rate each year. Packs are bought for the whole portfolio, so each agent takes its share of the bill by credits.',
   inputs: ['engine', 'planned'],
   fn: (engine, planned) => {
-    const {rate, buffer, growth, basis} = engine;
-    const agents = engine.agents.concat((Array.isArray(planned) ? planned : []).map((p) => {
+    const {rate, buffer, growth, basis, off} = engine;
+    const every = engine.agents.concat((Array.isArray(planned) ? planned : []).map((p) => {
       const starts = Math.min(3, Math.max(0, Math.round(num(p.starts)))), base = Math.max(0, Math.round(num(p.users)));
       const users = PERIODS.map((x, n) => usersIn(base, growth, n));
       return {agent_id: 'planned-' + p.id, row: p.id, agent: String(p.name || 'Planned agent').slice(0, 60), kind: 'Planned', build: 'Your estimate', starts, users,
-        credits: users.map((u, n) => (n >= starts ? u * Math.max(0, num(p.credits_per_user)) * (1 + buffer) : 0))};
+        credits: users.map((u, n) => (n >= starts ? u * Math.max(0, num(p.credits_per_user)) * (1 + buffer) : 0)),
+        on: !off.has('planned-' + p.id), credits_per_user: Math.max(0, num(p.credits_per_user))};
     }));
+    // Only the agents ticked on the page count towards totals, the forecast and the build comparison.
+    const agents = every.filter((a) => a.on);
     const periods = PERIODS.map((period, n) => {
       const live = agents.filter((a) => n >= a.starts), credits = live.reduce((x, a) => x + a.credits[n], 0), b = buy(credits, rate, basis);
       return {period, n, agents: live.length, users: live.reduce((x, a) => x + a.users[n], 0), credits, b, revenue_month: b.revenue, revenue_year: b.revenue * 12};
@@ -137,11 +145,11 @@ dash.calc('book', {
       cumulative: p.n ? r2(sum += p.revenue_year) : null}));
     let run = 0;
     // The whole portfolio built one way or the other: every modelled agent switched, planned agents as entered.
-    const modelled = engine.agents.length;
+    const modelled = engine.agents.filter((a) => a.on).length;
     const builds = Object.keys(BUILDS).map((build) => {
       const bought = PERIODS.map((x, n) => buy(agents.filter((a) => n >= a.starts).reduce((t, a) => t + (a.alt ? a.alt[build][n] : a.credits[n]), 0), rate, basis));
       const credits = agents.reduce((t, a) => t + (a.starts ? 0 : a.alt ? a.alt[build][0] : a.credits[0]), 0);
-      const on = engine.agents.filter((a) => a.s_build === build).length;
+      const on = engine.agents.filter((a) => a.on && a.s_build === build).length;
       return {build_id: build, build: BUILDS[build], credits_month: r2(credits), revenue_month: r2(bought[0].revenue), revenue_year: r2(bought[0].revenue * 12),
         three_year: r2(bought.slice(1).reduce((t, b) => t + b.revenue * 12, 0)), agents_on: on, agents_modelled: modelled,
         in_use: on === 0 ? 'No' : on === modelled ? 'All' : 'Some'};
@@ -157,13 +165,21 @@ dash.calc('book', {
         users: p.n >= a.starts ? a.users[p.n] : 0, revenue_year: r2(share(a, p.n) * 12)}))),
       runway: Array.from({length: 37}, (x, m) => ({month: m, period: m ? PERIODS[Math.ceil(m / 12)] : 'Start',
         revenue_month: m ? r2(periods[Math.ceil(m / 12)].revenue_month) : 0, cumulative: r2(run += m ? periods[Math.ceil(m / 12)].revenue_month : 0)})),
+      cards: every.map((a) => {
+        const alone = buy(a.credits[a.starts], rate, basis).revenue;
+        return {agent_id: a.agent_id, row: a.row || '', agent: a.agent, kind: a.kind, on: a.on, live: a.starts ? 'From Year ' + a.starts : 'Live today',
+          status: a.kind === 'Planned' ? (a.starts ? 'Planned, Year ' + a.starts : 'Planned') : 'Live', build: a.build, users: a.users[a.starts],
+          users_label: a.users_label || 'Users', revenue_month: r2(a.on && !a.starts ? share(a, 0) : alone), counted: a.on,
+          share_pct: a.on && today.credits ? r2(100 * a.credits[0] / today.credits) : 0, year3: r2(a.on ? share(a, 3) * 12 : buy(a.credits[3], rate, basis).revenue * 12),
+          parts: a.parts || [], covers: a.covers || 0, credits_per_user: a.credits_per_user || null, editable: a.kind === 'Modelled'};
+      }),
       agents: agents.map((a) => ({agent_id: a.agent_id, row: a.row || '', agent: a.agent, kind: a.kind, build: a.build, live: a.starts ? 'From Year ' + a.starts : 'Live today',
         users: a.users[0], credits_month: r2(a.credits[0]), revenue_month: r2(share(a, 0)), revenue_year: r2(share(a, 0) * 12),
         revenue_per_user: a.starts === 0 && a.users[0] ? r2(share(a, 0) / a.users[0]) : 0,
         share_pct: today.credits ? r2(100 * a.credits[0] / today.credits) : 0, year3: r2(share(a, 3) * 12)})),
       purchase: [['Pay-as-you-go', today.b.payg, 'payg'], ['Packs only', today.b.packs, 'packs'], ['Packs plus pay-as-you-go', today.b.hybrid, 'hybrid']]
         .map(([option, cost, key]) => ({option, cost_month: r2(cost), cheapest: option === today.b.cheapest, chosen: key === basis || (basis === 'lowest' && option === today.b.cheapest)})),
-      portfolio: {agents: today.agents, agents_all: agents.length, users: today.users, credits_month: r2(today.credits), revenue_month: r2(today.revenue_month),
+      portfolio: {agents: today.agents, agents_all: agents.length, selected: agents.length, total_agents: every.length, off: every.filter((a) => !a.on).map((a) => a.agent_id).join(','), users: today.users, credits_month: r2(today.credits), revenue_month: r2(today.revenue_month),
         revenue_year: r2(today.revenue_year), revenue_per_user: today.users ? r2(today.revenue_month / today.users) : 0, packs_needed: today.b.needed,
         basis: BASES[basis], s_basis: basis, cheapest: today.b.cheapest, growth_pct: r2(growth * 100), buffer_pct: r2(buffer * 100),
         year1: forecast[1].revenue_year, year2: forecast[2].revenue_year, year3: forecast[3].revenue_year, three_year: forecast[3].cumulative,
@@ -178,6 +194,7 @@ view('portfolio', 'book', 'Portfolio today', 'All agents live today: users, cred
 view('forecast', 'book', 'Three-year forecast', `Today, then each year with users grown by the chosen rate. Annual revenue is twelve months at that year's volume.`, (book) => book.forecast);
 view('forecast_agents', 'book', 'Forecast by agent', `Each agent's share of every year's revenue.`, (book) => book.split);
 view('runway', 'book', 'Cumulative revenue by month', 'Revenue added month by month over the three forecast years.', (book) => book.runway);
+view('agent_cards', 'book', 'Agents to choose from', 'Every agent, ticked or not: what it earns a month, its share of the selection and the parts it covers. Unticked agents show what they would add on their own.', (book) => book.cards);
 view('agent_totals', 'book', 'Agents in the portfolio', 'One line per agent: users, credits, revenue today and in Year 3.', (book) => book.agents);
 view('build_compare', 'book', 'Standard agent against Copilot harness, whole portfolio', 'Revenue if every modelled agent were built as a standard agent, and if every one ran on the Copilot harness, everything else as set. Planned agents count the same either way.', (book) => book.builds);
 view('purchase', 'book', 'Ways to buy the credits', `This month's portfolio credits priced three ways.`, (book) => book.purchase);

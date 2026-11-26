@@ -1,7 +1,7 @@
 // Drawings and controls. Every number shown comes from a calc in model.js.
 const money = (v, d) => '$' + (+v).toLocaleString('en-US', {minimumFractionDigits: d, maximumFractionDigits: d});
 const fmts = {
-  usd: (v) => (Math.abs(v) >= 1e6 ? '$' + (v / 1e6).toFixed(2) + 'M' : Math.abs(v) >= 1e4 ? '$' + (v / 1e3).toFixed(1) + 'K' : money(v, Math.abs(v) >= 100 ? 0 : 2)),
+  usd: (v) => (Math.abs(v) >= 1e6 ? '$' + (v / 1e6).toFixed(2) + 'M' : Math.abs(v) >= 1e4 ? '$' + (v / 1e3).toFixed(1) + 'K' : money(v, Math.abs(v) >= 100 || !+v ? 0 : 2)),
   usd0: (v) => money(v, 0),
   usd2: (v) => money(v, 2),
   num: (v) => (Math.abs(v) >= 1e6 ? (v / 1e6).toFixed(2) + 'M' : Math.round(v).toLocaleString('en-US')),
@@ -184,11 +184,84 @@ dash.draw('chart-meters', (box) => {
   if (got) bars(box, got[0], {label: (d) => d.meter, value: (d) => d.credits_month, text: (d) => fmts.num(d.credits_month), sub: (d) => fmts.pct(d.share_pct), color: () => paint(0),
     tip: (d) => [fmts.dec(d.credits_month) + ' credits a month', fmts.pct(d.share_pct) + ' of the credits before the buffer']});
 });
+// One card per agent. The tick decides what counts; Adjust picks the agent the sliders change.
+const PARTS = ['Quotes', 'Advisor drafts', 'Other scenarios'];
+let pickSearch = null, pickBox = null;
+const pickFilter = () => {
+  const q = pickSearch ? pickSearch.value.trim().toLowerCase() : '';
+  if (pickBox) pickBox.querySelectorAll('.cc-ag').forEach((n) => { n.hidden = !!q && !n.dataset.name.includes(q); });
+};
+dash.draw('agent-cards', (box) => {
+  const got = ready(box, 'agent_cards', 'portfolio');
+  if (!got) return;
+  const now = dash.data('agent_now'), editing = now.status === 'ok' && now.data[0] ? now.data[0].agent_id : '';
+  const [cards, pf] = got, p = pf[0] || {}, off = new Set(String(p.off || '').split(',').filter(Boolean));
+  pickBox = box;
+  const setOff = (next) => dash.setParams({off: [...next].join(',')});
+  const tools = h('div', 'cc-pick-tools'), all = h('button', 'cc-btn', 'Select all'), none = h('button', 'cc-btn', 'Clear');
+  const sum = h('p', 'cc-pick-sum');
+  sum.append(h('b', '', fmts.int(p.selected || 0) + ' of ' + fmts.int(cards.length)), ' agents ticked ', h('span', 'cc-hero-dot', '·'), ' ', h('b', '', fmts.usd0(p.revenue_month || 0)), ' a month');
+  all.type = none.type = 'button';
+  all.addEventListener('click', () => setOff([]));
+  none.addEventListener('click', () => setOff(cards.map((c) => c.agent_id)));
+  if (cards.length > 8) {
+    if (!pickSearch) { pickSearch = h('input', 'cc-text cc-pick-q'); pickSearch.type = 'search'; pickSearch.placeholder = 'Search agents'; pickSearch.setAttribute('aria-label', 'Search agents'); pickSearch.addEventListener('input', pickFilter); }
+    tools.append(sum, pickSearch, all, none);
+  } else tools.append(sum, all, none);
+  const grid = h('div', 'cc-pick-grid');
+  cards.forEach((c) => {
+    const card = h('article', 'cc-ag' + (c.on ? ' cc-ag-on' : '') + (c.agent_id === editing ? ' cc-ag-edit-now' : ''));
+    card.dataset.name = c.agent.toLowerCase();
+    const top = h('div', 'cc-ag-top'), label = h('label', 'cc-ag-name'), tick = h('input');
+    tick.type = 'checkbox'; tick.checked = c.on;
+    tick.addEventListener('change', () => { const next = new Set(off); if (tick.checked) next.delete(c.agent_id); else next.add(c.agent_id); setOff(next); });
+    label.append(tick, h('span', '', c.agent));
+    top.append(label, h('span', 'cc-ag-pill' + (c.status === 'Live' ? ' cc-ag-live' : ''), c.status));
+    const val = h('p', 'cc-ag-v', fmts.usd0(c.revenue_month));
+    const later = c.live !== 'Live today' ? ' ' + c.live.replace('From', 'from') : '';
+    val.append(h('small', '', ' a month' + later + (c.on ? '' : ', if ticked')));
+    const track = h('div', 'cc-ag-track'), fill = h('i');
+    fill.style.width = Math.min(100, c.share_pct) + '%';
+    track.append(fill);
+    const who = String(c.users_label || 'Users').split(' ')[0].toLowerCase();
+    const counted = !c.on ? 'Not counted' : later ? 'Counts' + later : fmts.pct(c.share_pct) + ' of the selection';
+    const meta = h('p', 'cc-ag-meta', counted + ' · ' + fmts.int(c.users) + ' ' + who + (c.editable ? ' · ' + c.build : ''));
+    card.append(top, val, track, meta);
+    if (c.parts.length) {
+      const parts = h('div', 'cc-ag-parts'), bar = h('div', 'cc-ag-stack'), keys = h('div', 'cc-ag-keys');
+      parts.append(h('span', 'cc-ag-k', 'Covers ' + c.covers + ' activities'));
+      c.parts.forEach((x) => {
+        const i = PARTS.indexOf(x.part) < 0 ? 0 : PARTS.indexOf(x.part), seg = h('i'), key = h('span', 'cc-key'), sw = h('span', 'cc-swatch');
+        seg.style.width = x.pct + '%'; seg.style.background = paint(i); seg.title = x.part + ': ' + fmts.pct(x.pct);
+        sw.style.background = paint(i); key.append(sw, x.part + ' ' + Math.round(x.pct) + '%');
+        bar.append(seg); keys.append(key);
+      });
+      parts.append(bar, keys);
+      card.append(parts);
+    } else if (c.credits_per_user) card.append(h('p', 'cc-ag-meta', 'Your estimate: ' + fmts.dec(c.credits_per_user) + ' credits per user a month'));
+    if (c.editable) {
+      const go = h('button', 'cc-ag-btn', c.agent_id === editing ? 'Editing in the controls' : 'Adjust');
+      go.type = 'button';
+      go.addEventListener('click', () => dash.setParams({agent: c.agent_id}));
+      card.append(go);
+    }
+    grid.append(card);
+  });
+  const add = h('button', 'cc-ag-add');
+  add.type = 'button';
+  add.append(h('b', '', '+ Add an agent'), h('small', '', 'One with no calculator yet'));
+  add.addEventListener('click', () => { const f = document.querySelector('#add-agent input'); if (f) { f.scrollIntoView({behavior: 'smooth', block: 'center'}); f.focus({preventScroll: true}); } });
+  grid.append(add);
+  box.replaceChildren(tools, grid);
+  if (cards.length > 8) pickFilter();
+});
+
 // The two builds side by side at the top: whichever earns more is the green one.
 dash.draw('hero-builds', (box) => {
   const got = ready(box, 'build_compare', 'agents');
   if (!got) return;
   const [rows, agents] = got, ids = agents.map((a) => a.agent_id);
+  if (!rows.length || !rows[0].agents_modelled) { box.replaceChildren(h('p', 'cc-hero-empty', 'Tick an agent that has a calculator to compare the two builds.')); return; }
   const card = (r) => {
     const c = h('article', 'cc-build ' + (r.higher ? 'cc-build-win' : 'cc-build-alt')), head = h('div', 'cc-build-head');
     c.setAttribute('aria-label', r.build + ': ' + fmts.usd0(r.revenue_month) + ' a month' + (r.higher ? ', the higher revenue' : ''));
